@@ -1,0 +1,40 @@
+PODS:
+  - Flutter (1.0.0)
+  - flutter_web_auth (0.1.3):
+    - Flutter
+  - package_info (0.0.1):
+    - Flutter
+  - path_provider (0.0.1):
+    - Flutter
+  - path_provider_macos (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - flutter_web_auth (from `.symlinks/plugins/flutter_web_auth/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  flutter_web_auth:
+    :path: ".symlinks/plugins/flutter_web_auth/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
+  path_provider:
+    :path: ".symlinks/plugins/path_provider/ios"
+  path_provider_macos:
+    :path: ".symlinks/plugins/path_provider_macos/ios"
+
+SPEC CHECKSUMS:
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_web_auth: 852e01fc7fdac9bd99315745ebb9196b84cb8811
+  package_info: 48b108e75b8802c2d5e126f208ef540561c98aef
+  path_provider: fb74bd0465e96b594bb3b5088ee4a4e7bb1f2a9d
+  path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
+
+PODFILE CHECKSUM: 1b66dae606f75376c5f2135a8290850eeb09ae83
+
+COCOAPODS: 1.9.1
