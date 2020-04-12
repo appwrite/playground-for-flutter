@@ -1,26 +1,32 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
+import 'package:file_picker/file_picker.dart';
+
 
 void main() {
   Client client = Client();
   Account account = Account(client);
+  Storage storage = Storage(client);
 
   client
       .setEndpoint('https://localhost/v1') // Your project ID
       .setProject('5e8cf4f46b5e8') // Your project ID
       .setSelfSigned()
   ;
-  
+
   runApp(
     new MaterialApp(
-      home: new Playground(account: account),
+      home: new Playground(client: client, account: account, storage: storage),
     )
   );
 }
 
 class Playground extends StatefulWidget {
-  Playground({this.account});
+  Playground({this.client, this.account, this.storage});
+  final Client client;
   final Account account;
+  final Storage storage;
 
   @override
   PlaygroundState createState() => new PlaygroundState();
@@ -32,6 +38,7 @@ class PlaygroundState extends State<Playground> {
 
   @override
   void initState() {
+
     widget.account.get()
       .then((response) {
         setState(() {
@@ -44,6 +51,30 @@ class PlaygroundState extends State<Playground> {
         });
       });
 
+    FilePicker.getFile(type: FileType.image)
+      .then((response) {
+        MultipartFile.fromFile(response.path, filename:response.path.split('/').last)
+        .then((response) {
+          widget.storage.createFile(
+            file: response,
+            read: ['*'],
+            write: []
+          )
+          .then((response) {
+            print(response);
+          })
+          .catchError((error) {
+            print(error.response);
+          });
+        })
+        .catchError((error) {
+          print(error);
+        });
+      })
+      .catchError((error) {
+        print(error);
+      });
+
     super.initState();
   }
 
@@ -53,11 +84,10 @@ class PlaygroundState extends State<Playground> {
     return new Scaffold(
       appBar: new AppBar(title: new Text("Appwrite + Flutter = ❤️"), backgroundColor: Colors.pinkAccent[200]),
       body: new Container(
-        child: new Center(
+        child: new SingleChildScrollView(
           child: new Column(
             children: <Widget>[
               new Padding(padding: new EdgeInsets.all(20.0)),
-
               ButtonTheme(
                 minWidth: 280.0,
                 height: 50.0,
@@ -166,6 +196,8 @@ class PlaygroundState extends State<Playground> {
                   }
                 ),
               ),
+              
+              new Padding(padding: new EdgeInsets.all(20.0)),
             ]
           )
         )
