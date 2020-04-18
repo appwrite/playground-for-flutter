@@ -12,7 +12,7 @@ void main() {
   client
       .setEndpoint('https://localhost/v1') // Your project ID
       .setProject('5e8cf4f46b5e8') // Your project ID
-      .setSelfSigned()
+      .setSelfSigned() // Do not use this in production
   ;
 
   runApp(
