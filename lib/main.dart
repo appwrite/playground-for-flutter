@@ -46,6 +46,7 @@ class PlaygroundState extends State<Playground> {
         });
       })
       .catchError((error) {
+        print(error);
         setState(() {
           username = 'Anonymous User';
         });
@@ -191,7 +192,7 @@ class PlaygroundState extends State<Playground> {
                         });
                       }).catchError((error) {
                         print('error');
-                        print(error.response.data);
+                        print(error.response);
                       });
                   }
                 ),
