@@ -10,7 +10,7 @@ void main() {
   Storage storage = Storage(client);
 
   client
-      .setEndpoint('https://localhost/v1') // Your project ID
+      .setEndpoint('https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP id needed
       .setProject('5e8cf4f46b5e8') // Your project ID
       .setSelfSigned() // Do not use this in production
   ;
@@ -96,7 +96,7 @@ class PlaygroundState extends State<Playground> {
                   child: new Text("Login with Facebook", style: new TextStyle(color: Colors.white, fontSize: 20.0)),
                   color: Colors.blue,
                   onPressed: () {
-                    widget.account.createOAuth2Session(provider: 'facebook', success: '', failure: '')
+                    widget.account.createOAuth2Session(provider: 'facebook')
                       .then((value) {
                           widget.account.get()
                           .then((response) {
