@@ -17,8 +17,8 @@ environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
-  appwrite: ^0.2.1
-  file_picker: ^1.6.2
+  appwrite: ^0.2.2
+  file_picker: ^1.10.0
   flutter:
     sdk: flutter
 
