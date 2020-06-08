@@ -16,8 +16,8 @@ void main() {
   ;
 
   runApp(
-    new MaterialApp(
-      home: new Playground(client: client, account: account, storage: storage),
+     MaterialApp(
+      home: Playground(client: client, account: account, storage: storage),
     )
   );
 }
@@ -29,7 +29,7 @@ class Playground extends StatefulWidget {
   final Storage storage;
 
   @override
-  PlaygroundState createState() => new PlaygroundState();
+  PlaygroundState createState() => PlaygroundState();
 }
 
 class PlaygroundState extends State<Playground> {
@@ -82,18 +82,18 @@ class PlaygroundState extends State<Playground> {
   @override
   Widget build(BuildContext context) {
 
-    return new Scaffold(
-      appBar: new AppBar(title: new Text("Appwrite + Flutter = ❤️"), backgroundColor: Colors.pinkAccent[200]),
-      body: new Container(
-        child: new SingleChildScrollView(
-          child: new Column(
+    return Scaffold(
+      appBar: AppBar(title: Text("Appwrite + Flutter = ❤️"), backgroundColor: Colors.pinkAccent[200]),
+      body: Container(
+        child: SingleChildScrollView(
+          child: Column(
             children: <Widget>[
-              new Padding(padding: new EdgeInsets.all(20.0)),
+               Padding(padding: EdgeInsets.all(20.0)),
               ButtonTheme(
                 minWidth: 280.0,
                 height: 50.0,
-                child: new RaisedButton(
-                  child: new Text("Login with Facebook", style: new TextStyle(color: Colors.white, fontSize: 20.0)),
+                child: RaisedButton(
+                  child: Text("Login with Facebook", style: TextStyle(color: Colors.white, fontSize: 20.0)),
                   color: Colors.blue,
                   onPressed: () {
                     widget.account.createOAuth2Session(provider: 'facebook')
@@ -114,13 +114,13 @@ class PlaygroundState extends State<Playground> {
                 ),
               ),
 
-              new Padding(padding: new EdgeInsets.all(10.0)),
+              Padding(padding: EdgeInsets.all(10.0)),
 
               ButtonTheme(
                 minWidth: 280.0,
                 height: 50.0,
-                child: new RaisedButton(
-                  child: new Text("Login with GitHub", style: new TextStyle(color: Colors.white, fontSize: 20.0)),
+                child: RaisedButton(
+                  child: Text("Login with GitHub", style: TextStyle(color: Colors.white, fontSize: 20.0)),
                   color: Colors.black87,
                   onPressed: () {
                     widget.account.createOAuth2Session(provider: 'github', success: '', failure: '')
@@ -141,13 +141,13 @@ class PlaygroundState extends State<Playground> {
                 ),
               ),
 
-              new Padding(padding: new EdgeInsets.all(10.0)),
+               Padding(padding: EdgeInsets.all(10.0)),
 
               ButtonTheme(
                 minWidth: 280.0,
                 height: 50.0,
-                child: new RaisedButton(
-                  child: new Text("Login with Google", style: new TextStyle(color: Colors.white, fontSize: 20.0)),
+                child: RaisedButton(
+                  child: Text("Login with Google", style: TextStyle(color: Colors.white, fontSize: 20.0)),
                   color: Colors.red,
                   onPressed: () {
                     widget.account.createOAuth2Session(provider: 'google', success: '', failure: '')
@@ -168,21 +168,21 @@ class PlaygroundState extends State<Playground> {
                 ),
               ),
               
-              new Padding(padding: new EdgeInsets.all(20.0)),
-              new Divider(),
-              new Padding(padding: new EdgeInsets.all(20.0)),
+               Padding(padding: EdgeInsets.all(20.0)),
+               Divider(),
+               Padding(padding: EdgeInsets.all(20.0)),
               
-              new Text(username, style: new TextStyle(color: Colors.black, fontSize: 20.0)),
+               Text(username, style: TextStyle(color: Colors.black, fontSize: 20.0)),
               
-              new Padding(padding: new EdgeInsets.all(20.0)),
-              new Divider(),
-              new Padding(padding: new EdgeInsets.all(20.0)),
+               Padding(padding: EdgeInsets.all(20.0)),
+               Divider(),
+               Padding(padding: EdgeInsets.all(20.0)),
 
               ButtonTheme(
                 minWidth: 280.0,
                 height: 50.0,
-                child: new RaisedButton(
-                  child: new Text('Logout', style: new TextStyle(color: Colors.white, fontSize: 20.0)),
+                child: RaisedButton(
+                  child: Text('Logout', style: TextStyle(color: Colors.white, fontSize: 20.0)),
                   color: Colors.red[700],
                   onPressed: () {
                     widget.account.deleteSession(sessionId: 'current')
@@ -198,7 +198,7 @@ class PlaygroundState extends State<Playground> {
                 ),
               ),
               
-              new Padding(padding: new EdgeInsets.all(20.0)),
+               Padding(padding: EdgeInsets.all(20.0)),
             ]
           )
         )
