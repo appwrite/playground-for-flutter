@@ -10,7 +10,7 @@ void main() {
   Storage storage = Storage(client);
 
   client
-      .setEndpoint('https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP id needed
+      .setEndpoint('https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
       .setProject('5e8cf4f46b5e8') // Your project ID
       .setSelfSigned() // Do not use this in production
   ;
