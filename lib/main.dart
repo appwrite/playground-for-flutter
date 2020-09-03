@@ -11,14 +11,13 @@ void main() {
 
   client
           .setEndpoint(
-              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP id needed
-          .setProject('5e63e0a61d9c2') // Your project ID
+              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('5e8cf4f46b5e8') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
   runApp(MaterialApp(
-    home: Playground(
-        client: client, account: account, storage: storage, database: database),
+    home: Playground(client: client, account: account, storage: storage),
   ));
 }
 

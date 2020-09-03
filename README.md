@@ -1,7 +1,5 @@
 # Appwrite's Flutter Playground 🎮
 
-**Work in Progress**
-
 Appwrite playground is a simple way to explore the Appwrite API & Appwrite Flutter SDK. Use the source code of this page to learn how to use the different Appwrite Flutter SDK features.
 
 <!--![Appwrite Playground](preview.png)-->
