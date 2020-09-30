@@ -1,0 +1,6 @@
+include: package:lint/analysis_options_package.yaml
+
+linter:
+  rules:
+    prefer_const_constructors: false
+    prefer_single_quotes: true
