@@ -1,3 +1,5 @@
+<img src="https://www.vectorlogo.zone/logos/flutterio/flutterio-icon.svg" alt="android" width="22" height="22"/> 
+
 # Appwrite's Flutter Playground 🎮
 
 Appwrite playground is a simple way to explore the Appwrite API & Appwrite Flutter SDK. Use the source code of this page to learn how to use the different Appwrite Flutter SDK features.
