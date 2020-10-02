@@ -16,7 +16,7 @@ This playground doesn't include any Appwrite best practices but rather intended 
 
 All code contributions - including those of people having commit access - must go through a pull request and approved by a core developer before being merged. This is to ensure proper review of all the code.
 
-We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide]([CONTRIBUTING.md](https://github.com/appwrite/appwrite/blob/master/CONTRIBUTING.md)).
+We truly ❤️ pull requests! If you wish to help, you can learn more about how you can contribute to this project in the [contribution guide]([CONTRIBUTING.md](/CONTRIBUTING.md)).
 
 ## Security
 
