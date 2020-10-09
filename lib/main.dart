@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
@@ -17,7 +18,7 @@ void main() {
       ;
 
   runApp(MaterialApp(
-    home: Playground(client: client, account: account, storage: storage),
+    home: Playground(client: client, account: account, storage: storage,database: database,),
   ));
 }
 
@@ -37,6 +38,11 @@ class PlaygroundState extends State<Playground> {
 
   @override
   void initState() {
+    _getAccount();
+    super.initState();
+  }
+
+  _getAccount() {
     widget.account.get().then((response) {
       setState(() {
         username = response.data['name'];
@@ -47,27 +53,39 @@ class PlaygroundState extends State<Playground> {
         username = 'Anonymous User';
       });
     });
+  }
 
+  _uploadFile() {
     FilePicker.platform
         .pickFiles(type: FileType.image, allowMultiple: false)
         .then((response) {
-      MultipartFile.fromFile(response.files.single.path,
-              filename: response.files.single.path.split('/').last)
-          .then((response) {
-        widget.storage.createFile(file: response, read: ['*'], write: []).then(
-            (response) {
+      if (response == null) return;
+      final file = response.files.single;
+      if (!kIsWeb) {
+        final path = file.path;
+        MultipartFile.fromFile(path, filename: file.name).then((response) {
+          widget.storage.createFile(
+              file: response, read: ['*'], write: []).then((response) {
+            print(response);
+          }).catchError((error) {
+            print(error.response);
+          });
+        }).catchError((error) {
+          print(error);
+        });
+      } else {
+        if (file.bytes == null) return;
+        final uploadFile = MultipartFile.fromBytes(file.bytes, filename: file.name);
+        widget.storage.createFile(
+            file: uploadFile, read: ['*'], write: []).then((response) {
           print(response);
         }).catchError((error) {
           print(error.response);
         });
-      }).catchError((error) {
-        print(error);
-      });
+      }
     }).catchError((error) {
       print(error);
     });
-
-    super.initState();
   }
 
   @override
@@ -93,6 +111,7 @@ class PlaygroundState extends State<Playground> {
                           email: 'test2@appwrite.io', password: 'eldad12')
                       .then((value) {
                     print(value);
+                    _getAccount();
                   }).catchError((error) {
                     print(error.message);
                   });
@@ -117,6 +136,18 @@ class PlaygroundState extends State<Playground> {
                       .catchError((error) {
                         print(error.response);
                       });
+                }),
+          ),
+          const SizedBox(height: 10.0),
+          ButtonTheme(
+            minWidth: 280.0,
+            height: 50.0,
+            child: RaisedButton(
+                child: Text("Upload file",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
+                color: Colors.blue,
+                onPressed: () {
+                  _uploadFile();
                 }),
           ),
           Padding(padding: EdgeInsets.all(20.0)),
