@@ -48,9 +48,11 @@ class PlaygroundState extends State<Playground> {
       });
     });
 
-    FilePicker.getFile(type: FileType.image).then((response) {
-      MultipartFile.fromFile(response.path,
-              filename: response.path.split('/').last)
+    FilePicker.platform
+        .pickFiles(type: FileType.image, allowMultiple: false)
+        .then((response) {
+      MultipartFile.fromFile(response.files.single.path,
+              filename: response.files.single.path.split('/').last)
           .then((response) {
         widget.storage.createFile(file: response, read: ['*'], write: []).then(
             (response) {
