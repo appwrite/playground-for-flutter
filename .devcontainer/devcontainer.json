@@ -1,0 +1,11 @@
+{
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "settings":{
+    "terminal.integrated.shell.linux":"/bin/bash",
+  },
+  "name": "Flutter",
+  "extensions": ["Dart-Code.dart-code", "Dart-Code.flutter","auchenberg.vscode-browser-preview",],
+  "forwardPorts": [3000]
+}
