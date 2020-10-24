@@ -18,7 +18,12 @@ void main() {
       ;
 
   runApp(MaterialApp(
-    home: Playground(client: client, account: account, storage: storage,database: database,),
+    home: Playground(
+      client: client,
+      account: account,
+      storage: storage,
+      database: database,
+    ),
   ));
 }
 
@@ -75,7 +80,8 @@ class PlaygroundState extends State<Playground> {
         });
       } else {
         if (file.bytes == null) return;
-        final uploadFile = MultipartFile.fromBytes(file.bytes, filename: file.name);
+        final uploadFile =
+            MultipartFile.fromBytes(file.bytes, filename: file.name);
         widget.storage.createFile(
             file: uploadFile, read: ['*'], write: []).then((response) {
           print(response);
