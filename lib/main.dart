@@ -13,7 +13,7 @@ void main() {
   client
           .setEndpoint(
               'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('5e8cf4f46b5e8') // Your project ID
+          .setProject('5e63e0a61d9c2') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -114,7 +114,7 @@ class PlaygroundState extends State<Playground> {
                 onPressed: () {
                   widget.account
                       .createSession(
-                          email: 'test2@appwrite.io', password: 'eldad12')
+                          email: 'user@appwrite.io', password: 'password')
                       .then((value) {
                     print(value);
                     _getAccount();
