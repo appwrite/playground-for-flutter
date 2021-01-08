@@ -2,6 +2,8 @@
 
 Appwrite playground is a simple way to explore the Appwrite API & Appwrite Flutter SDK. Use the source code of this page to learn how to use the different Appwrite Flutter SDK features.
 
+This is Appwrite Flutter integration. For Dart server side integration please look at our [Dart Playground](https://github.com/appwrite/playground-for-dart) and [Dart SDK](https://github.com/appwrite/sdk-for-dart)
+
 ![Appwrite Playground](preview.png)
 
 ## Get Started
