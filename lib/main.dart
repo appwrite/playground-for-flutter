@@ -107,10 +107,10 @@ class PlaygroundState extends State<Playground> {
           ButtonTheme(
             minWidth: 280.0,
             height: 50.0,
-            child: RaisedButton(
+            child: ElevatedButton(
                 child: Text("Login with Email",
                     style: TextStyle(color: Colors.black, fontSize: 20.0)),
-                color: Colors.grey,
+                style: ElevatedButton.styleFrom(primary: Colors.grey),
                 onPressed: () {
                   widget.account
                       .createSession(
