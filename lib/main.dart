@@ -83,7 +83,7 @@ class PlaygroundState extends State<Playground> {
         final uploadFile =
             MultipartFile.fromBytes(file.bytes, filename: file.name);
         widget.storage.createFile(
-            file: uploadFile, read: ['*'], write: []).then((response) {
+            file: uploadFile, read: ['*'], write: ['*']).then((response) {
           print(response);
         }).catchError((error) {
           print(error.response);
