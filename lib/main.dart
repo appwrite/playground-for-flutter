@@ -40,6 +40,8 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
+  Map<String, dynamic> user;
+  Map<String, dynamic> uploadedFile;
 
   @override
   void initState() {
@@ -51,6 +53,7 @@ class PlaygroundState extends State<Playground> {
     widget.account.get().then((response) {
       setState(() {
         username = response.data['name'];
+        user = response.data;
       });
     }).catchError((error) {
       print(error);
@@ -70,8 +73,13 @@ class PlaygroundState extends State<Playground> {
         final path = file.path;
         MultipartFile.fromFile(path, filename: file.name).then((response) {
           widget.storage.createFile(
-              file: response, read: ['*'], write: []).then((response) {
+              file: response,
+              read: [user != null ? "user:${user['\$id']}" : '*'],
+              write: ['*']).then((response) {
             print(response);
+            setState(() {
+              uploadedFile = response.data;
+            });
           }).catchError((error) {
             print(error.response);
           });
@@ -83,10 +91,16 @@ class PlaygroundState extends State<Playground> {
         final uploadFile =
             MultipartFile.fromBytes(file.bytes, filename: file.name);
         widget.storage.createFile(
-            file: uploadFile, read: ['*'], write: ['*']).then((response) {
+          file: uploadFile,
+          read: [user != null ? "user:${user['\$id']}" : '*'],
+          write: ['*'],
+        ).then((response) {
           print(response);
+          setState(() {
+            uploadedFile = response.data;
+          });
         }).catchError((error) {
-          print(error.response);
+          print(error.message);
         });
       }
     }).catchError((error) {
@@ -229,6 +243,20 @@ class PlaygroundState extends State<Playground> {
                   });
                 }),
           ),
+          if (user != null)
+            FutureBuilder(
+              future:
+                  widget.storage.getFileView(fileId: '22' ?? uploadedFile['\$id']),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return Image.memory(snapshot.data.data);
+                }
+                if(snapshot.hasError) {
+                  print(snapshot.error);
+                }
+                return CircularProgressIndicator();
+              },
+            ),
           Padding(padding: EdgeInsets.all(20.0)),
           Divider(),
           Padding(padding: EdgeInsets.all(20.0)),
