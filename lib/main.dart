@@ -274,10 +274,10 @@ class PlaygroundState extends State<Playground> {
                       });
                     }),
               ),
-              if (user != null)
+              if (user != null && uploadedFile != null)
                 FutureBuilder(
                   future: widget.storage
-                      .getFileView(fileId: '22' ?? uploadedFile['\$id']),
+                      .getFileView(fileId: uploadedFile['\$id']),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data.data);
