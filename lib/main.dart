@@ -111,180 +111,219 @@ class PlaygroundState extends State<Playground> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            title: Text("Appwrite + Flutter = ❤️"),
-            backgroundColor: Colors.pinkAccent[200]),
-        body: Container(
-            child: SingleChildScrollView(
-                child: Column(children: <Widget>[
-          Padding(padding: EdgeInsets.all(20.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: ElevatedButton(
-                child: Text("Login with Email",
-                    style: TextStyle(color: Colors.black, fontSize: 20.0)),
-                style: ElevatedButton.styleFrom(primary: Colors.grey),
-                onPressed: () {
-                  widget.account
-                      .createSession(
-                          email: 'user@appwrite.io', password: 'password')
-                      .then((value) {
-                    print(value);
-                    _getAccount();
-                  }).catchError((error) {
-                    print(error.message);
-                  });
-                }),
-          ),
-          Padding(padding: EdgeInsets.all(20.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text("Create Doc",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.blue,
-                onPressed: () {
-                  widget.database
-                      .createDocument(
-                          collectionId: '5f2e3c52f03c0',
-                          data: {'username': 'hello2'},
-                          read: ['*'],
-                          write: ['*'])
-                      .then((value) {})
-                      .catchError((error) {
+      appBar: AppBar(
+          title: Text("Appwrite + Flutter = ❤️"),
+          backgroundColor: Colors.pinkAccent[200]),
+      body: Container(
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Padding(padding: EdgeInsets.all(20.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Login with Email",
+                      style: TextStyle(color: Colors.black, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.grey,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.account
+                          .createSession(
+                              email: 'user@appwrite.io', password: 'password')
+                          .then((value) {
+                        print(value);
+                        _getAccount();
+                      }).catchError((error) {
+                        print(error.message);
+                      });
+                    }),
+              ),
+              Padding(padding: EdgeInsets.all(20.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Create Doc",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.database
+                          .createDocument(
+                              collectionId: '5f2e3c52f03c0',
+                              data: {'username': 'hello2'},
+                              read: ['*'],
+                              write: ['*'])
+                          .then((value) {})
+                          .catchError((error) {
+                            print(error.response);
+                          });
+                    }),
+              ),
+              const SizedBox(height: 10.0),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Upload file",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      _uploadFile();
+                    }),
+              ),
+              Padding(padding: EdgeInsets.all(20.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Login with Facebook",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.account
+                          .createOAuth2Session(provider: 'facebook')
+                          .then((value) {
+                        widget.account.get().then((response) {
+                          setState(() {
+                            username = response.data['name'];
+                          });
+                        }).catchError((error) {
+                          setState(() {
+                            username = 'Anonymous User';
+                          });
+                        });
+                      });
+                    }),
+              ),
+              Padding(padding: EdgeInsets.all(10.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Login with GitHub",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.black87,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.account
+                          .createOAuth2Session(
+                              provider: 'github', success: '', failure: '')
+                          .then((value) {
+                        widget.account.get().then((response) {
+                          setState(() {
+                            username = response.data['name'];
+                          });
+                        }).catchError((error) {
+                          setState(() {
+                            username = 'Anonymous User';
+                          });
+                        });
+                      });
+                    }),
+              ),
+              Padding(padding: EdgeInsets.all(10.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text(
+                      "Login with Google",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0),
+                    ),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.account
+                          .createOAuth2Session(provider: 'google')
+                          .then((value) {
+                        widget.account.get().then((response) {
+                          setState(() {
+                            username = response.data['name'];
+                          });
+                        }).catchError((error) {
+                          setState(() {
+                            username = 'Anonymous User';
+                          });
+                        });
+                      });
+                    }),
+              ),
+              if (user != null)
+                FutureBuilder(
+                  future: widget.storage
+                      .getFileView(fileId: '22' ?? uploadedFile['\$id']),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return Image.memory(snapshot.data.data);
+                    }
+                    if (snapshot.hasError) {
+                      print(snapshot.error);
+                    }
+                    return CircularProgressIndicator();
+                  },
+                ),
+              Padding(padding: EdgeInsets.all(20.0)),
+              Divider(),
+              Padding(padding: EdgeInsets.all(20.0)),
+              Text(username,
+                  style: TextStyle(color: Colors.black, fontSize: 20.0)),
+              Padding(padding: EdgeInsets.all(20.0)),
+              Divider(),
+              Padding(padding: EdgeInsets.all(20.0)),
+              ButtonTheme(
+                minWidth: 280.0,
+                height: 50.0,
+                child: ElevatedButton(
+                    child: Text('Logout',
+                        style: TextStyle(color: Colors.white, fontSize: 20.0)),
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red[700],
+                      padding: const EdgeInsets.all(16),
+                    ),
+                    onPressed: () {
+                      widget.account
+                          .deleteSession(sessionId: 'current')
+                          .then((response) {
+                        setState(() {
+                          username = 'Anonymous User';
+                        });
+                      }).catchError((error) {
+                        print('error');
                         print(error.response);
                       });
-                }),
+                    }),
+              ),
+              Padding(padding: EdgeInsets.all(20.0)),
+            ],
           ),
-          const SizedBox(height: 10.0),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text("Upload file",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.blue,
-                onPressed: () {
-                  _uploadFile();
-                }),
-          ),
-          Padding(padding: EdgeInsets.all(20.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text("Login with Facebook",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.blue,
-                onPressed: () {
-                  widget.account
-                      .createOAuth2Session(provider: 'facebook')
-                      .then((value) {
-                    widget.account.get().then((response) {
-                      setState(() {
-                        username = response.data['name'];
-                      });
-                    }).catchError((error) {
-                      setState(() {
-                        username = 'Anonymous User';
-                      });
-                    });
-                  });
-                }),
-          ),
-          Padding(padding: EdgeInsets.all(10.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text("Login with GitHub",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.black87,
-                onPressed: () {
-                  widget.account
-                      .createOAuth2Session(
-                          provider: 'github', success: '', failure: '')
-                      .then((value) {
-                    widget.account.get().then((response) {
-                      setState(() {
-                        username = response.data['name'];
-                      });
-                    }).catchError((error) {
-                      setState(() {
-                        username = 'Anonymous User';
-                      });
-                    });
-                  });
-                }),
-          ),
-          Padding(padding: EdgeInsets.all(10.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text("Login with Google",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.red,
-                onPressed: () {
-                  widget.account
-                      .createOAuth2Session(provider: 'google')
-                      .then((value) {
-                    widget.account.get().then((response) {
-                      setState(() {
-                        username = response.data['name'];
-                      });
-                    }).catchError((error) {
-                      setState(() {
-                        username = 'Anonymous User';
-                      });
-                    });
-                  });
-                }),
-          ),
-          if (user != null)
-            FutureBuilder(
-              future:
-                  widget.storage.getFileView(fileId: '22' ?? uploadedFile['\$id']),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return Image.memory(snapshot.data.data);
-                }
-                if(snapshot.hasError) {
-                  print(snapshot.error);
-                }
-                return CircularProgressIndicator();
-              },
-            ),
-          Padding(padding: EdgeInsets.all(20.0)),
-          Divider(),
-          Padding(padding: EdgeInsets.all(20.0)),
-          Text(username, style: TextStyle(color: Colors.black, fontSize: 20.0)),
-          Padding(padding: EdgeInsets.all(20.0)),
-          Divider(),
-          Padding(padding: EdgeInsets.all(20.0)),
-          ButtonTheme(
-            minWidth: 280.0,
-            height: 50.0,
-            child: RaisedButton(
-                child: Text('Logout',
-                    style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                color: Colors.red[700],
-                onPressed: () {
-                  widget.account
-                      .deleteSession(sessionId: 'current')
-                      .then((response) {
-                    setState(() {
-                      username = 'Anonymous User';
-                    });
-                  }).catchError((error) {
-                    print('error');
-                    print(error.response);
-                  });
-                }),
-          ),
-          Padding(padding: EdgeInsets.all(20.0)),
-        ]))));
+        ),
+      ),
+    );
   }
 }
