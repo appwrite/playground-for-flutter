@@ -13,7 +13,7 @@ void main() {
   client
           .setEndpoint(
               'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('5e63e0a61d9c2') // Your project ID
+          .setProject('602122a685782') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -49,18 +49,19 @@ class PlaygroundState extends State<Playground> {
     super.initState();
   }
 
-  _getAccount() {
-    widget.account.get().then((response) {
+  _getAccount() async {
+    try {
+      final response = await widget.account.get();
       setState(() {
         username = response.data['name'];
         user = response.data;
       });
-    }).catchError((error) {
-      print(error);
+    } on AppwriteException catch (error) {
+      print(error.message);
       setState(() {
         username = 'Anonymous User';
       });
-    });
+    }
   }
 
   _uploadFile() {
@@ -81,11 +82,11 @@ class PlaygroundState extends State<Playground> {
               uploadedFile = response.data;
             });
           }).catchError((error) {
-            print(error.response);
-          });
+            print(error.message);
+          }, test: (e) => e is AppwriteException);
         }).catchError((error) {
-          print(error);
-        });
+          print(error.message);
+        }, test: (e) => e is AppwriteException);
       } else {
         if (file.bytes == null) return;
         final uploadFile =
@@ -101,7 +102,7 @@ class PlaygroundState extends State<Playground> {
           });
         }).catchError((error) {
           print(error.message);
-        });
+        }, test: (e) => e is AppwriteException);
       }
     }).catchError((error) {
       print(error);
@@ -140,7 +141,7 @@ class PlaygroundState extends State<Playground> {
                         _getAccount();
                       }).catchError((error) {
                         print(error.message);
-                      });
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               Padding(padding: EdgeInsets.all(20.0)),
@@ -165,8 +166,8 @@ class PlaygroundState extends State<Playground> {
                               write: ['*'])
                           .then((value) {})
                           .catchError((error) {
-                            print(error.response);
-                          });
+                            print(error.message);
+                          }, test: (e) => e is AppwriteException);
                     }),
               ),
               const SizedBox(height: 10.0),
@@ -211,8 +212,10 @@ class PlaygroundState extends State<Playground> {
                           setState(() {
                             username = 'Anonymous User';
                           });
-                        });
-                      });
+                        }, test: (e) => e is AppwriteException);
+                      }).catchError((error) {
+                        print(error.message);
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               Padding(padding: EdgeInsets.all(10.0)),
@@ -238,11 +241,14 @@ class PlaygroundState extends State<Playground> {
                             username = response.data['name'];
                           });
                         }).catchError((error) {
+                          print(error.message);
                           setState(() {
                             username = 'Anonymous User';
                           });
-                        });
-                      });
+                        }, test: (e) => e is AppwriteException);
+                      }).catchError((error) {
+                        print(error.message);
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               Padding(padding: EdgeInsets.all(10.0)),
@@ -267,11 +273,14 @@ class PlaygroundState extends State<Playground> {
                             username = response.data['name'];
                           });
                         }).catchError((error) {
+                          print(error.message);
                           setState(() {
                             username = 'Anonymous User';
                           });
-                        });
-                      });
+                        }, test: (e) => e is AppwriteException);
+                      }).catchError((error) {
+                        print(error.message);
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               if (user != null && uploadedFile != null)
@@ -283,6 +292,9 @@ class PlaygroundState extends State<Playground> {
                       return Image.memory(snapshot.data.data);
                     }
                     if (snapshot.hasError) {
+                      if(snapshot.error is AppwriteException) {
+                        print((snapshot.error as AppwriteException).message);
+                      }
                       print(snapshot.error);
                     }
                     return CircularProgressIndicator();
@@ -314,9 +326,8 @@ class PlaygroundState extends State<Playground> {
                           username = 'Anonymous User';
                         });
                       }).catchError((error) {
-                        print('error');
-                        print(error.response);
-                      });
+                        print(error.message);
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               Padding(padding: EdgeInsets.all(20.0)),

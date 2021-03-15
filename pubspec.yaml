@@ -21,7 +21,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  appwrite: ^0.4.0-dev.2
+  appwrite: ^0.4.0-dev.3
   file_picker: ^2.1.7
 
 dev_dependencies:
