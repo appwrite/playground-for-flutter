@@ -93,9 +93,9 @@ class PlaygroundState extends State<Playground> {
           print(error.message);
         }, test: (e) => e is AppwriteException);
       } else {
-        if (file.path == null) return;
-        final uploadFile =
-            MultipartFile.fromFileSync(file.path!, filename: file.name);
+        if (file.bytes == null) return;
+        List<int>? bytes = file.bytes?.map((i) => i).toList();
+        final uploadFile = MultipartFile.fromBytes(bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
           read: [user != null ? "user:${user!['\$id']}" : '*'],
@@ -289,15 +289,15 @@ class PlaygroundState extends State<Playground> {
                     }),
               ),
               if (user != null && uploadedFile != null)
-                FutureBuilder(
-                  future: widget.storage
-                      .getFileView(fileId: uploadedFile['\$id']),
+                FutureBuilder<Response>(
+                  future:
+                      widget.storage.getFileView(fileId: uploadedFile!['\$id']),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      return Image.memory(snapshot.data.data);
+                      return Image.memory(snapshot.data?.data);
                     }
                     if (snapshot.hasError) {
-                      if(snapshot.error is AppwriteException) {
+                      if (snapshot.error is AppwriteException) {
                         print((snapshot.error as AppwriteException).message);
                       }
                       print(snapshot.error);
