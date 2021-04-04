@@ -12,8 +12,8 @@ void main() {
 
   client
           .setEndpoint(
-              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('602122a685782') // Your project ID
+              'https://10.0.2.2/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('606961e26fe69') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -28,7 +28,11 @@ void main() {
 }
 
 class Playground extends StatefulWidget {
-  Playground({this.client, this.account, this.storage, this.database});
+  Playground(
+      {required this.client,
+      required this.account,
+      required this.storage,
+      required this.database});
   final Client client;
   final Account account;
   final Storage storage;
@@ -40,8 +44,8 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  Map<String, dynamic> user;
-  Map<String, dynamic> uploadedFile;
+  Map<String, dynamic>? user;
+  Map<String, dynamic>? uploadedFile;
 
   @override
   void initState() {
@@ -72,10 +76,11 @@ class PlaygroundState extends State<Playground> {
       final file = response.files.single;
       if (!kIsWeb) {
         final path = file.path;
+        if (path == null) return;
         MultipartFile.fromFile(path, filename: file.name).then((response) {
           widget.storage.createFile(
               file: response,
-              read: [user != null ? "user:${user['\$id']}" : '*'],
+              read: [user != null ? "user:${user!['\$id']}" : '*'],
               write: ['*']).then((response) {
             print(response);
             setState(() {
@@ -88,12 +93,12 @@ class PlaygroundState extends State<Playground> {
           print(error.message);
         }, test: (e) => e is AppwriteException);
       } else {
-        if (file.bytes == null) return;
+        if (file.path == null) return;
         final uploadFile =
-            MultipartFile.fromBytes(file.bytes, filename: file.name);
+            MultipartFile.fromFileSync(file.path!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
-          read: [user != null ? "user:${user['\$id']}" : '*'],
+          read: [user != null ? "user:${user!['\$id']}" : '*'],
           write: ['*'],
         ).then((response) {
           print(response);
@@ -203,7 +208,7 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'facebook')
-                          .then((value) {
+                          ?.then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];
@@ -235,7 +240,7 @@ class PlaygroundState extends State<Playground> {
                       widget.account
                           .createOAuth2Session(
                               provider: 'github', success: '', failure: '')
-                          .then((value) {
+                          ?.then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];
@@ -267,7 +272,7 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'google')
-                          .then((value) {
+                          ?.then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];
