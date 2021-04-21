@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +15,8 @@ void main() {
 
   client
           .setEndpoint(
-              'https://10.0.2.2/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('606961e26fe69') // Your project ID
+              'https://192.168.0.104/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('60793ca4ce59e') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -44,8 +47,8 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  Map<String, dynamic>? user;
-  Map<String, dynamic>? uploadedFile;
+  UserModel? user;
+  FileModel? uploadedFile;
 
   @override
   void initState() {
@@ -57,8 +60,8 @@ class PlaygroundState extends State<Playground> {
     try {
       final response = await widget.account.get();
       setState(() {
-        username = response.data['name'];
-        user = response.data;
+        username = response.name;
+        user = response;
       });
     } on AppwriteException catch (error) {
       print(error.message);
@@ -77,14 +80,14 @@ class PlaygroundState extends State<Playground> {
       if (!kIsWeb) {
         final path = file.path;
         if (path == null) return;
-        MultipartFile.fromFile(path, filename: file.name).then((response) {
+        FileInput.fromFile(path, filename: file.name).then((response) {
           widget.storage.createFile(
               file: response,
-              read: [user != null ? "user:${user!['\$id']}" : '*'],
+              read: [user != null ? "user:${user?.$id}" : '*'],
               write: ['*']).then((response) {
             print(response);
             setState(() {
-              uploadedFile = response.data;
+              uploadedFile = response;
             });
           }).catchError((error) {
             print(error.message);
@@ -95,15 +98,15 @@ class PlaygroundState extends State<Playground> {
       } else {
         if (file.bytes == null) return;
         List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile = MultipartFile.fromBytes(bytes!, filename: file.name);
+        final uploadFile = FileInput.fromBytes(bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
-          read: [user != null ? "user:${user!['\$id']}" : '*'],
+          read: [user != null ? "user:${user?.$id}" : '*'],
           write: ['*'],
         ).then((response) {
           print(response);
           setState(() {
-            uploadedFile = response.data;
+            uploadedFile = response;
           });
         }).catchError((error) {
           print(error.message);
@@ -208,10 +211,10 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'facebook')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
-                            username = response.data['name'];
+                            username = response.name;
                           });
                         }).catchError((error) {
                           setState(() {
@@ -240,10 +243,10 @@ class PlaygroundState extends State<Playground> {
                       widget.account
                           .createOAuth2Session(
                               provider: 'github', success: '', failure: '')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
-                            username = response.data['name'];
+                            username = response.name;
                           });
                         }).catchError((error) {
                           print(error.message);
@@ -272,10 +275,10 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'google')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
-                            username = response.data['name'];
+                            username = response.name;
                           });
                         }).catchError((error) {
                           print(error.message);
@@ -289,12 +292,12 @@ class PlaygroundState extends State<Playground> {
                     }),
               ),
               if (user != null && uploadedFile != null)
-                FutureBuilder<Response>(
+                FutureBuilder<Uint8List>(
                   future:
-                      widget.storage.getFileView(fileId: uploadedFile!['\$id']),
+                      widget.storage.getFileView(fileId: uploadedFile!.$id),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      return Image.memory(snapshot.data?.data);
+                      return Image.memory(snapshot.data!);
                     }
                     if (snapshot.hasError) {
                       if (snapshot.error is AppwriteException) {
