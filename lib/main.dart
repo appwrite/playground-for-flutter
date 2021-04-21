@@ -12,8 +12,8 @@ void main() {
 
   client
           .setEndpoint(
-              'https://10.0.2.2/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('606961e26fe69') // Your project ID
+              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('60793ca4ce59e') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -208,7 +208,7 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'facebook')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];
@@ -240,7 +240,7 @@ class PlaygroundState extends State<Playground> {
                       widget.account
                           .createOAuth2Session(
                               provider: 'github', success: '', failure: '')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];
@@ -272,7 +272,7 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.account
                           .createOAuth2Session(provider: 'google')
-                          ?.then((value) {
+                          .then((value) {
                         widget.account.get().then((response) {
                           setState(() {
                             username = response.data['name'];

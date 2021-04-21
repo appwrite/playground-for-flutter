@@ -30,7 +30,7 @@ dev_dependencies:
 
 dependency_overrides:
   appwrite:
-    path: /home/dlohani/Documents/projects/appwrite/sdks/sdk-for-flutter
+    git: https://github.com/appwrite/sdk-for-flutter
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
