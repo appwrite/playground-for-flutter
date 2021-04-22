@@ -15,6 +15,7 @@ void main() {
               'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
           .setProject('60793ca4ce59e') // Your project ID
           .setSelfSigned() // Do not use this in production
+          .addHeader('Origin', 'http://localhost')
       ;
 
   runApp(MaterialApp(
@@ -165,7 +166,7 @@ class PlaygroundState extends State<Playground> {
                     onPressed: () {
                       widget.database
                           .createDocument(
-                              collectionId: '5f2e3c52f03c0',
+                              collectionId: '607fcdd228202', //change your collection id
                               data: {'username': 'hello2'},
                               read: ['*'],
                               write: ['*'])
