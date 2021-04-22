@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
 
+
 void main() {
   Client client = Client();
   Account account = Account(client);
@@ -14,12 +15,11 @@ void main() {
   Database database = Database(client);
 
   client
-          .setEndpoint(
-              'https://192.168.0.104/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('60793ca4ce59e') // Your project ID
-          .setSelfSigned() // Do not use this in production
-          .addHeader('Origin', 'http://localhost')
-      ;
+      .setEndpoint(
+          'https://192.168.0.104/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+      .setProject('60793ca4ce59e') // Your project ID
+      .setSelfSigned() // Do not use this in production
+      .addHeader('Origin', 'http://localhost');
 
   runApp(MaterialApp(
     home: Playground(
@@ -167,16 +167,15 @@ class PlaygroundState extends State<Playground> {
                       padding: const EdgeInsets.all(16),
                     ),
                     onPressed: () {
-                      widget.database
-                          .createDocument(
-                              collectionId: '607fc9d11cced',
-                              data: {'username': 'hello2'},
-                              read: ['*'],
-                              write: ['*'])
-                          .then((value) {})
-                          .catchError((error) {
-                            print(error.message);
-                          }, test: (e) => e is AppwriteException);
+                      widget.database.createDocument(
+                          collectionId: '607fcdd228202',
+                          data: {'username': 'hello2'},
+                          read: ['*'],
+                          write: ['*']).then((value) {
+                        print(value.toMap());
+                      }).catchError((error) {
+                        print(error.message);
+                      }, test: (e) => e is AppwriteException);
                     }),
               ),
               const SizedBox(height: 10.0),
@@ -294,8 +293,7 @@ class PlaygroundState extends State<Playground> {
               ),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Uint8List>(
-                  future:
-                      widget.storage.getFileView(fileId: uploadedFile!.$id),
+                  future: widget.storage.getFileView(fileId: uploadedFile!.$id),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data!);
