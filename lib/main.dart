@@ -58,14 +58,17 @@ class PlaygroundState extends State<Playground> {
   _getAccount() async {
     try {
       final response = await widget.account.get();
-      setState(() {
+      if (response.data['email'] == null || response.data['email'] == '') {
+        username = "Anonymous Login";
+      } else {
         username = response.data['name'];
-        user = response.data;
-      });
+      }
+      user = response.data;
+      setState(() {});
     } on AppwriteException catch (error) {
       print(error.message);
       setState(() {
-        username = 'Anonymous User';
+        username = 'No Session';
       });
     }
   }
@@ -127,6 +130,25 @@ class PlaygroundState extends State<Playground> {
           child: Column(
             children: <Widget>[
               Padding(padding: EdgeInsets.all(20.0)),
+              ElevatedButton(
+                  child: Text(
+                    "Anonymous Login",
+                    style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account.createAnonymousSession().then((value) {
+                      print(value);
+                      _getAccount();
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
+              const SizedBox(height: 10.0),
               ElevatedButton(
                   child: Text(
                     "Login with Email",
@@ -336,7 +358,7 @@ class PlaygroundState extends State<Playground> {
                         .deleteSession(sessionId: 'current')
                         .then((response) {
                       setState(() {
-                        username = 'Anonymous User';
+                        username = 'No Session';
                       });
                     }).catchError((error) {
                       print(error.message);
