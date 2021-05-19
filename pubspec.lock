@@ -4,11 +4,9 @@ packages:
   appwrite:
     dependency: "direct main"
     description:
-      path: "."
-      ref: HEAD
-      resolved-ref: "8f5829eb83e3d97d59819703d9f81c6ede0265ff"
-      url: "https://github.com/aw-tests/sdk-for-flutter"
-    source: git
+      name: appwrite
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "0.6.0"
   async:
     dependency: transitive
