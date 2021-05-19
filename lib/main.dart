@@ -15,7 +15,7 @@ void main() {
               'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
           .setProject('60793ca4ce59e') // Your project ID
           .setSelfSigned() // Do not use this in production
-          .addHeader('Origin', 'http://localhost')
+      // .addHeader('Origin', 'http://localhost')
       ;
 
   runApp(MaterialApp(
@@ -47,6 +47,7 @@ class PlaygroundState extends State<Playground> {
   String username = "Loading...";
   Map<String, dynamic>? user;
   Map<String, dynamic>? uploadedFile;
+  String? jwt;
 
   @override
   void initState() {
@@ -126,169 +127,177 @@ class PlaygroundState extends State<Playground> {
           child: Column(
             children: <Widget>[
               Padding(padding: EdgeInsets.all(20.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Login with Email",
-                      style: TextStyle(color: Colors.black, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.grey,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.account
-                          .createSession(
-                              email: 'user@appwrite.io', password: 'password')
-                          .then((value) {
-                        print(value);
-                        _getAccount();
-                      }).catchError((error) {
-                        print(error.message);
-                      }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+              ElevatedButton(
+                  child: Text(
+                    "Login with Email",
+                    style: TextStyle(color: Colors.black, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.grey,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account
+                        .createSession(
+                            email: 'testuser@appwrite.io', password: 'password')
+                        .then((value) {
+                      print(value);
+                      _getAccount();
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
               Padding(padding: EdgeInsets.all(20.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Create Doc",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.database
-                          .createDocument(
-                              collectionId: '607fcdd228202', //change your collection id
-                              data: {'username': 'hello2'},
-                              read: ['*'],
-                              write: ['*'])
-                          .then((value) {})
-                          .catchError((error) {
-                            print(error.message);
-                          }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+              ElevatedButton(
+                  child: Text(
+                    "Create Doc",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(280, 50),
+                    primary: Colors.blue,
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  onPressed: () {
+                    widget.database
+                        .createDocument(
+                            collectionId:
+                                '607fcdd228202', //change your collection id
+                            data: {'username': 'hello2'},
+                            read: ['*'],
+                            write: ['*'])
+                        .then((value) {})
+                        .catchError((error) {
+                          print(error.message);
+                        }, test: (e) => e is AppwriteException);
+                  }),
               const SizedBox(height: 10.0),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Upload file",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      _uploadFile();
-                    }),
-              ),
+              ElevatedButton(
+                  child: Text(
+                    "Upload file",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    _uploadFile();
+                  }),
               Padding(padding: EdgeInsets.all(20.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Login with Facebook",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.account
-                          .createOAuth2Session(provider: 'facebook')
-                          .then((value) {
-                        widget.account.get().then((response) {
-                          setState(() {
-                            username = response.data['name'];
-                          });
-                        }).catchError((error) {
-                          setState(() {
-                            username = 'Anonymous User';
-                          });
-                        }, test: (e) => e is AppwriteException);
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () async {
+                    try {
+                      final res = await widget.account.createJWT();
+                      setState(() {
+                        jwt = res.data.toString();
+                      });
+                    } on AppwriteException catch (e) {
+                      print(e.message);
+                    }
+                  },
+                  child: Text("Generate JWT",
+                      style: TextStyle(color: Colors.white, fontSize: 20.0))),
+              const SizedBox(height: 20.0),
+              if (jwt != null) ...[
+                SelectableText(
+                  jwt!,
+                  style: TextStyle(fontSize: 18.0),
+                ),
+                const SizedBox(height: 20.0),
+              ],
+              ElevatedButton(
+                  child: Text(
+                    "Login with Facebook",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.blue,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account
+                        .createOAuth2Session(provider: 'facebook')
+                        .then((value) {
+                      widget.account.get().then((response) {
+                        setState(() {
+                          username = response.data['name'];
+                        });
                       }).catchError((error) {
-                        print(error.message);
+                        setState(() {
+                          username = 'Anonymous User';
+                        });
                       }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
               Padding(padding: EdgeInsets.all(10.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Login with GitHub",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.black87,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.account
-                          .createOAuth2Session(
-                              provider: 'github', success: '', failure: '')
-                          .then((value) {
-                        widget.account.get().then((response) {
-                          setState(() {
-                            username = response.data['name'];
-                          });
-                        }).catchError((error) {
-                          print(error.message);
-                          setState(() {
-                            username = 'Anonymous User';
-                          });
-                        }, test: (e) => e is AppwriteException);
+              ElevatedButton(
+                  child: Text(
+                    "Login with GitHub",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.black87,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account
+                        .createOAuth2Session(
+                            provider: 'github', success: '', failure: '')
+                        .then((value) {
+                      widget.account.get().then((response) {
+                        setState(() {
+                          username = response.data['name'];
+                        });
                       }).catchError((error) {
                         print(error.message);
+                        setState(() {
+                          username = 'Anonymous User';
+                        });
                       }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
               Padding(padding: EdgeInsets.all(10.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text(
-                      "Login with Google",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.account
-                          .createOAuth2Session(provider: 'google')
-                          .then((value) {
-                        widget.account.get().then((response) {
-                          setState(() {
-                            username = response.data['name'];
-                          });
-                        }).catchError((error) {
-                          print(error.message);
-                          setState(() {
-                            username = 'Anonymous User';
-                          });
-                        }, test: (e) => e is AppwriteException);
+              ElevatedButton(
+                  child: Text(
+                    "Login with Google",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red,
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account
+                        .createOAuth2Session(provider: 'google')
+                        .then((value) {
+                      widget.account.get().then((response) {
+                        setState(() {
+                          username = response.data['name'];
+                        });
                       }).catchError((error) {
                         print(error.message);
+                        setState(() {
+                          username = 'Anonymous User';
+                        });
                       }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Response>(
                   future:
@@ -314,28 +323,25 @@ class PlaygroundState extends State<Playground> {
               Padding(padding: EdgeInsets.all(20.0)),
               Divider(),
               Padding(padding: EdgeInsets.all(20.0)),
-              ButtonTheme(
-                minWidth: 280.0,
-                height: 50.0,
-                child: ElevatedButton(
-                    child: Text('Logout',
-                        style: TextStyle(color: Colors.white, fontSize: 20.0)),
-                    style: ElevatedButton.styleFrom(
-                      primary: Colors.red[700],
-                      padding: const EdgeInsets.all(16),
-                    ),
-                    onPressed: () {
-                      widget.account
-                          .deleteSession(sessionId: 'current')
-                          .then((response) {
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }).catchError((error) {
-                        print(error.message);
-                      }, test: (e) => e is AppwriteException);
-                    }),
-              ),
+              ElevatedButton(
+                  child: Text('Logout',
+                      style: TextStyle(color: Colors.white, fontSize: 20.0)),
+                  style: ElevatedButton.styleFrom(
+                    primary: Colors.red[700],
+                    padding: const EdgeInsets.all(16),
+                    minimumSize: Size(280, 50),
+                  ),
+                  onPressed: () {
+                    widget.account
+                        .deleteSession(sessionId: 'current')
+                        .then((response) {
+                      setState(() {
+                        username = 'Anonymous User';
+                      });
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+                  }),
               Padding(padding: EdgeInsets.all(20.0)),
             ],
           ),
