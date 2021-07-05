@@ -16,7 +16,7 @@ void main() {
           .setEndpoint(
               'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
           .setProject('608fa1dd20ef0') // Your project ID
-          .setSelfSigned() // Do not use this in production
+          // .setSelfSigned() // Do not use this in production
       ;
 
   runApp(MaterialApp(
@@ -42,47 +42,6 @@ class Playground extends StatefulWidget {
 
   @override
   PlaygroundState createState() => PlaygroundState();
-}
-
-class MyDocument {
-  final String userName;
-  final String id;
-  MyDocument({
-    required this.userName,
-    required this.id,
-  });
-
-  Map<String, dynamic> toMap() {
-    return {
-      'userName': userName,
-      'id': id,
-    };
-  }
-
-  factory MyDocument.fromMap(Map<String, dynamic> map) {
-    return MyDocument(
-      userName: map['username'],
-      id: map['\$id'],
-    );
-  }
-
-  String toJson() => json.encode(toMap());
-
-  factory MyDocument.fromJson(String source) =>
-      MyDocument.fromMap(json.decode(source));
-
-  @override
-  String toString() => 'MyDocument(userName: $userName, id: $id)';
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is MyDocument && other.userName == userName && other.id == id;
-  }
-
-  @override
-  int get hashCode => userName.hashCode ^ id.hashCode;
 }
 
 class PlaygroundState extends State<Playground> {
@@ -409,4 +368,46 @@ class PlaygroundState extends State<Playground> {
       ),
     );
   }
+}
+
+
+class MyDocument {
+  final String userName;
+  final String id;
+  MyDocument({
+    required this.userName,
+    required this.id,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userName': userName,
+      'id': id,
+    };
+  }
+
+  factory MyDocument.fromMap(Map<String, dynamic> map) {
+    return MyDocument(
+      userName: map['username'],
+      id: map['\$id'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory MyDocument.fromJson(String source) =>
+      MyDocument.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'MyDocument(userName: $userName, id: $id)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is MyDocument && other.userName == userName && other.id == id;
+  }
+
+  @override
+  int get hashCode => userName.hashCode ^ id.hashCode;
 }
