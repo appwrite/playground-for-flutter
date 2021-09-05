@@ -82,11 +82,12 @@ class PlaygroundState extends State<Playground> {
       if (!kIsWeb) {
         final path = file.path;
         if (path == null) return;
-        MultipartFile.fromFile(path, filename: file.name).then((response) {
+        MultipartFile.fromPath('file', path, filename: file.name)
+            .then((response) {
           widget.storage.createFile(
               file: response,
               read: [user != null ? "user:${user!['\$id']}" : '*'],
-              write: ['*']).then((response) {
+              write: ['*', 'role:member']).then((response) {
             print(response);
             setState(() {
               uploadedFile = response.data;
@@ -100,11 +101,12 @@ class PlaygroundState extends State<Playground> {
       } else {
         if (file.bytes == null) return;
         List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile = MultipartFile.fromBytes(bytes!, filename: file.name);
+        final uploadFile =
+            MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
           read: [user != null ? "user:${user!['\$id']}" : '*'],
-          write: ['*'],
+          write: ['*', 'role:member'],
         ).then((response) {
           print(response);
           setState(() {
@@ -182,17 +184,16 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    widget.database
-                        .createDocument(
-                            collectionId:
-                                '607fcdd228202', //change your collection id
-                            data: {'username': 'hello2'},
-                            read: ['*'],
-                            write: ['*'])
-                        .then((value) {})
-                        .catchError((error) {
-                          print(error.message);
-                        }, test: (e) => e is AppwriteException);
+                    widget.database.createDocument(
+                      collectionId: '608faab562521', //change your collection id
+                      data: {'username': 'hello2'},
+                      read: ['*'],
+                      write: ['*'],
+                    ).then((value) {
+                      print(value);
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
                   }),
               const SizedBox(height: 10.0),
               ElevatedButton(
