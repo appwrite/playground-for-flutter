@@ -30,9 +30,10 @@ dev_dependencies:
 
 dependency_overrides:
   appwrite:
-    git:
-      url: https://github.com/appwrite/sdk-for-flutter
-      ref: feat-response-model
+    path: /home/dlohani/Documents/projects/appwrite/sdk-generator/examples/flutter
+    # git:
+    #   url: https://github.com/appwrite/sdk-for-flutter
+    #   ref: feat-response-model
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

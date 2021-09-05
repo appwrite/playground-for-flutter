@@ -5,6 +5,7 @@ import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:appwrite/src/models/models.dart';
 
 void main() {
   Client client = Client();
@@ -46,9 +47,9 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  UserModel? user;
-  FileModel? uploadedFile;
-  JwtModel? jwt;
+  User? user;
+  File? uploadedFile;
+  Jwt? jwt;
 
   @override
   void initState() {
@@ -80,7 +81,7 @@ class PlaygroundState extends State<Playground> {
       if (!kIsWeb) {
         final path = file.path;
         if (path == null) return;
-        FileInput.fromFile(path, filename: file.name).then((response) {
+        MultipartFile.fromPath('file', path, filename: file.name).then((response) {
           widget.storage.createFile(
               file: response,
               read: [user != null ? "user:${user?.$id}" : '*'],
@@ -98,7 +99,7 @@ class PlaygroundState extends State<Playground> {
       } else {
         if (file.bytes == null) return;
         List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile = FileInput.fromBytes(bytes!, filename: file.name);
+        final uploadFile = MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
           read: [user != null ? "user:${user?.$id}" : '*'],
@@ -188,7 +189,7 @@ class PlaygroundState extends State<Playground> {
                             read: ['*'],
                             write: ['*'])
                         .then((value) => value.convertTo<MyDocument>(
-                            (map) => MyDocument.fromMap(map)))
+                            (map) => MyDocument.fromMap(Map<String,dynamic>.from(map))))
                         .then((value) => print(value.userName))
                         .catchError((error) {
                           print(error.message);
