@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
@@ -48,6 +48,8 @@ class PlaygroundState extends State<Playground> {
   Map<String, dynamic>? user;
   Map<String, dynamic>? uploadedFile;
   String? jwt;
+  String? realtimeEvent;
+  RealtimeSubscription? subscription;
 
   @override
   void initState() {
@@ -82,11 +84,12 @@ class PlaygroundState extends State<Playground> {
       if (!kIsWeb) {
         final path = file.path;
         if (path == null) return;
-        MultipartFile.fromFile(path, filename: file.name).then((response) {
+        MultipartFile.fromPath('file', path, filename: file.name)
+            .then((response) {
           widget.storage.createFile(
               file: response,
               read: [user != null ? "user:${user!['\$id']}" : '*'],
-              write: ['*']).then((response) {
+              write: ['*', 'role:member']).then((response) {
             print(response);
             setState(() {
               uploadedFile = response.data;
@@ -100,11 +103,12 @@ class PlaygroundState extends State<Playground> {
       } else {
         if (file.bytes == null) return;
         List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile = MultipartFile.fromBytes(bytes!, filename: file.name);
+        final uploadFile =
+            MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
           read: [user != null ? "user:${user!['\$id']}" : '*'],
-          write: ['*'],
+          write: ['*', 'role:member'],
         ).then((response) {
           print(response);
           setState(() {
@@ -116,6 +120,25 @@ class PlaygroundState extends State<Playground> {
       }
     }).catchError((error) {
       print(error);
+    });
+  }
+
+  _subscribe() {
+    final realtime = Realtime(widget.client);
+    subscription = realtime.subscribe(['files', 'documents']);
+    setState(() {});
+    subscription!.stream.listen((data) {
+      print(data);
+      setState(() {
+        realtimeEvent = jsonEncode(data.toMap());
+      });
+    });
+  }
+
+  _unsubscribe() {
+    subscription?.close();
+    setState(() {
+      subscription = null;
     });
   }
 
@@ -172,6 +195,23 @@ class PlaygroundState extends State<Playground> {
                   }),
               Padding(padding: EdgeInsets.all(20.0)),
               ElevatedButton(
+                child: Text(
+                  subscription != null ? "Unsubscribe" : "Subscribe",
+                  style: TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(280, 50),
+                  primary: Colors.blue,
+                  padding: const EdgeInsets.all(16),
+                ),
+                onPressed: subscription != null ? _unsubscribe : _subscribe,
+              ),
+              if (realtimeEvent != null) ...[
+                const SizedBox(height: 10.0),
+                Text(realtimeEvent!),
+              ],
+              const SizedBox(height: 30.0),
+              ElevatedButton(
                   child: Text(
                     "Create Doc",
                     style: TextStyle(color: Colors.white, fontSize: 20.0),
@@ -182,17 +222,16 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    widget.database
-                        .createDocument(
-                            collectionId:
-                                '607fcdd228202', //change your collection id
-                            data: {'username': 'hello2'},
-                            read: ['*'],
-                            write: ['*'])
-                        .then((value) {})
-                        .catchError((error) {
-                          print(error.message);
-                        }, test: (e) => e is AppwriteException);
+                    widget.database.createDocument(
+                      collectionId: '608faab562521', //change your collection id
+                      data: {'username': 'hello2'},
+                      read: ['*'],
+                      write: ['*'],
+                    ).then((value) {
+                      print(value);
+                    }).catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
                   }),
               const SizedBox(height: 10.0),
               ElevatedButton(
