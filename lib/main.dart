@@ -1,4 +1,4 @@
-import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
@@ -48,6 +48,8 @@ class PlaygroundState extends State<Playground> {
   Map<String, dynamic>? user;
   Map<String, dynamic>? uploadedFile;
   String? jwt;
+  String? realtimeEvent;
+  RealtimeSubscription? subscription;
 
   @override
   void initState() {
@@ -121,6 +123,25 @@ class PlaygroundState extends State<Playground> {
     });
   }
 
+  _subscribe() {
+    final realtime = Realtime(widget.client);
+    subscription = realtime.subscribe(['files', 'documents']);
+    setState(() {});
+    subscription!.stream.listen((data) {
+      print(data);
+      setState(() {
+        realtimeEvent = jsonEncode(data.toMap());
+      });
+    });
+  }
+
+  _unsubscribe() {
+    subscription?.close();
+    setState(() {
+      subscription = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -173,6 +194,23 @@ class PlaygroundState extends State<Playground> {
                     }, test: (e) => e is AppwriteException);
                   }),
               Padding(padding: EdgeInsets.all(20.0)),
+              ElevatedButton(
+                child: Text(
+                  subscription != null ? "Unsubscribe" : "Subscribe",
+                  style: TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+                style: ElevatedButton.styleFrom(
+                  minimumSize: Size(280, 50),
+                  primary: Colors.blue,
+                  padding: const EdgeInsets.all(16),
+                ),
+                onPressed: subscription != null ? _unsubscribe : _subscribe,
+              ),
+              if (realtimeEvent != null) ...[
+                const SizedBox(height: 10.0),
+                Text(realtimeEvent!),
+              ],
+              const SizedBox(height: 30.0),
               ElevatedButton(
                   child: Text(
                     "Create Doc",
