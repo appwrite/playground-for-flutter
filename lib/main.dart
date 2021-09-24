@@ -14,10 +14,11 @@ void main() {
   Database database = Database(client);
 
   client
-    .setEndpoint('https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-    .setProject('60793ca4ce59e') // Your project ID
-    .setSelfSigned() // Do not use this in production
-  ;
+          .setEndpoint(
+              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('60793ca4ce59e') // Your project ID
+          .setSelfSigned() // Do not use this in production
+      ;
 
   runApp(MaterialApp(
     home: Playground(
@@ -60,11 +61,14 @@ class PlaygroundState extends State<Playground> {
 
   _getAccount() async {
     try {
-      final response = await widget.account.get();
-      setState(() {
-        username = response.name;
-        user = response;
-      });
+      user = await widget.account.get();
+      if (user!.email.isEmpty) {
+        username = "Anonymous Login";
+      } else {
+        username = user!.name;
+      }
+      user = user;
+      setState(() {});
     } on AppwriteException catch (error) {
       print(error.message);
       setState(() {
@@ -286,15 +290,7 @@ class PlaygroundState extends State<Playground> {
                     widget.account
                         .createOAuth2Session(provider: 'facebook')
                         .then((value) {
-                      widget.account.get().then((user) {
-                        setState(() {
-                          username = user.name;
-                        });
-                      }).catchError((error) {
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
@@ -315,16 +311,7 @@ class PlaygroundState extends State<Playground> {
                         .createOAuth2Session(
                             provider: 'github', success: '', failure: '')
                         .then((value) {
-                      widget.account.get().then((user) {
-                        setState(() {
-                          username = user.name;
-                        });
-                      }).catchError((error) {
-                        print(error.message);
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
@@ -344,16 +331,7 @@ class PlaygroundState extends State<Playground> {
                     widget.account
                         .createOAuth2Session(provider: 'google')
                         .then((value) {
-                      widget.account.get().then((response) {
-                        setState(() {
-                          username = response.name;
-                        });
-                      }).catchError((error) {
-                        print(error.message);
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
