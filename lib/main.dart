@@ -14,11 +14,10 @@ void main() {
   Database database = Database(client);
 
   client
-          .setEndpoint(
-              'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('608fa1dd20ef0') // Your project ID
-          // .setSelfSigned() // Do not use this in production
-      ;
+    .setEndpoint('https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+    .setProject('60793ca4ce59e') // Your project ID
+    .setSelfSigned() // Do not use this in production
+  ;
 
   runApp(MaterialApp(
     home: Playground(
@@ -228,8 +227,8 @@ class PlaygroundState extends State<Playground> {
                             data: {'username': 'hello2'},
                             read: ['*'],
                             write: ['*'])
-                        .then((value) => value.convertTo<MyDocument>(
-                            (map) => MyDocument.fromMap(Map<String,dynamic>.from(map))))
+                        .then((value) => value.convertTo<MyDocument>((map) =>
+                            MyDocument.fromMap(Map<String, dynamic>.from(map))))
                         .then((value) => print(value.userName))
                         .catchError((error) {
                           print(error.message);
@@ -410,7 +409,6 @@ class PlaygroundState extends State<Playground> {
     );
   }
 }
-
 
 class MyDocument {
   final String userName;
