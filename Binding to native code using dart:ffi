@@ -1,0 +1,58 @@
+//Step 1: Create a plugin
+flutter create --platforms=android,ios --template=plugin native_add
+cd native_add
+
+//Add C/C++ sources
+cat > ios/Classes/native_add.cpp << EOF
+#include <stdint.h>
+
+extern "C" __attribute__((visibility("default"))) __attribute__((used))
+int32_t native_add(int32_t x, int32_t y) {
+    return x + y;
+}
+EOF
+
+//In Xcode, open Runner.xcworkspace.
+Add the C/C++/Objective-C/Swift source files to the Xcode project.
+cat > android/CMakeLists.txt << EOF
+cmake_minimum_required(VERSION 3.4.1)  # for example
+
+add_library( native_add
+
+             # Sets the library as a shared library.
+             SHARED
+
+             # Provides a relative path to your source file(s).
+             ../ios/Classes/native_add.cpp )
+EOF
+//Finally, add an externalNativeBuild section to android/build.gradle.
+android {
+  // ...
+  externalNativeBuild {
+    // Encapsulates your CMake build configurations.
+    cmake {
+      // Provides a relative path to your CMake build script.
+      path "CMakeLists.txt"
+    }
+  }
+  // ...
+}
+
+
+//Step 3: Load the code using the FFI library
+import 'dart:ffi'; // For FFI
+import 'dart:io'; // For Platform.isX
+
+final DynamicLibrary nativeAddLib = Platform.isAndroid
+    ? DynamicLibrary.open("libnative_add.so")
+    : DynamicLibrary.process();
+
+final int Function(int x, int y) nativeAdd =
+  nativeAddLib
+    .lookup<NativeFunction<Int32 Function(Int32, Int32)>>("native_add")
+    .asFunction();
+
+// Inside of _MyAppState.build:
+        body: Center(
+          child: Text('1 + 2 == ${nativeAdd(1, 2)}'),
+        ),
