@@ -1,0 +1,130 @@
+//Setting up the app as a single app
+
+flutter create flavorsexample
+import 'package:flutter/material.dart';
+import 'home_page.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flavors Example',
+      theme: ThemeData(
+        primaryColor: Color(0xFF43a047),
+        accentColor: Color(0xFFffcc00),
+        primaryColorBrightness: Brightness.dark,
+      ),
+      home: HomePage(),
+    );
+  }
+}
+//Secondly, we create home_page.dart. It displays the app name, the current date, a short description, and two images.
+
+
+import 'package:flutter/material.dart';
+import 'home_page.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flavors Example',
+      theme: ThemeData(
+        primaryColor: Color(0xFF43a047),
+        accentColor: Color(0xFFffcc00),
+        primaryColorBrightness: Brightness.dark,
+      ),
+      home: HomePage(),
+    );
+    
+  }
+}
+   //Thirdly, we create a resource folder, and a new file display_strings.dart in in.
+   String APP_TITLE = "SingleApp";
+String DATE = "Today is ";
+String APP_DESCRIPTION = "Single App Description blah blah blah";
+
+//Fourthly, we add the intl package (used for date formatting) to pubspec.yaml as below, then do flutter packages get
+
+[...]
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  intl: ^0.15.7
+
+[...]
+ 
+ //Lastly, we set up the images. Create a folder assets (on same level as lib), then add images dancing.png and 1.png (right click on files then save), and amend the pubspec.yaml as below.
+ [...]
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+          - assets/
+
+[...]
+
+//Adding flavour
+[...]
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+          - assets/
+
+[...]
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.flavorsexample">
+
+    [...]
+
+    <application
+        android:name="io.flutter.app.FlutterApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher">
+
+[...]
+
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.flavorsexample">
+
+    [...]
+
+    <application
+        android:name="io.flutter.app.FlutterApplication"
+        android:label="@string/app_name"
+        android:icon="@mipmap/ic_launcher">
+
+[...]
+
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App 2</string>
+</resources>
+
+
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">App 2</string>
+</resources>
+
