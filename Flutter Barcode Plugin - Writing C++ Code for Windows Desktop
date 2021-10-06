@@ -1,0 +1,376 @@
+//Flutter Barcode Plugin - Writing C++ Code for Windows Desktop
+bin
+  /DynamsoftBarcodeReaderx64.dll
+
+include
+
+  /flutter_barcode_sdk
+
+    /flutter_barcode_sdk_plugin.h
+
+  /barcode_manager.h
+
+  /DynamsoftBarcodeReader.h
+
+  /DynamsoftCommon.h
+
+lib
+  /DBRx64.lib
+
+CMakeLists.txt
+
+flutter_barcode_sdk_plugin.cpp
+
+//Getting Started with the HandleMethodCall() Method
+void FlutterBarcodeSdkPlugin::HandleMethodCall(
+      const flutter::MethodCall<flutter::EncodableValue> &method_call,
+      std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result)
+  {
+    const auto *arguments = std::get_if<EncodableMap>(method_call.arguments());
+
+    if (method_call.method_name().compare("getPlatformVersion") == 0)
+    {
+      
+    }
+    else if (method_call.method_name().compare("setLicense") == 0)
+    {
+      
+    }
+    else if (method_call.method_name().compare("decodeFile") == 0)
+    {
+      
+    }
+    else if (method_call.method_name().compare("decodeFileBytes") == 0)
+    {
+      
+    }
+    else if (method_call.method_name().compare("decodeImageBuffer") == 0)
+    {
+      
+    }
+    else
+    {
+      result->NotImplemented();
+    }
+  }
+
+} 
+
+//The required C++ data types here include string, int and vector<unsigned char>. To convert Dart data types to C++ data types, 
+std::string filename;
+auto filename_it = arguments->find(EncodableValue("filename"));
+if (filename_it != arguments->end())
+{
+  filename = std::get<std::string>(filename_it->second);
+}
+
+
+std::vector<unsigned char> bytes;
+auto bytes_it = arguments->find(EncodableValue("bytes"));
+if (bytes_it != arguments->end())
+{
+  bytes = std::get<vector<unsigned char>>(bytes_it->second);
+}
+
+int width = 0;
+auto width_it = arguments->find(EncodableValue("width"));
+if (width_it != arguments->end())
+{
+  width = std::get<int>(width_it->second);
+}
+
+//Creating a BarcodeManager Class in barcode_manager.h
+EncodableList DecodeFile(const char * filename) 
+{
+    EncodableList out;   
+    int ret = reader->DecodeFile(filename, "");
+
+    if (ret == DBRERR_FILE_NOT_FOUND)
+    {
+        printf("Error code %d. %s\n", ret, CBarcodeReader::GetErrorString(ret));
+        return out;
+    }
+
+    return WrapResults();
+}
+
+EncodableList DecodeFileBytes(const unsigned char * bytes, int size) 
+{
+    reader->DecodeFileInMemory(bytes, size, "");
+    return WrapResults();
+}
+
+EncodableList DecodeImageBuffer(const unsigned char * buffer, int width, int height, int stride, int format) 
+{
+    ImagePixelFormat pixelFormat = IPF_BGR_888;
+    switch(format) {
+        case 0:
+            pixelFormat = IPF_GRAYSCALED;
+            break;
+        case 1:
+            pixelFormat = IPF_ARGB_8888;
+            break;
+    }
+
+    reader->DecodeBuffer(buffer, width, height, stride, pixelFormat, "");
+
+    return WrapResults();
+}
+
+EncodableList WrapResults() 
+{
+    EncodableList out;
+    TextResultArray *results = NULL;
+    reader->GetAllTextResults(&results);
+        
+    if (results->resultsCount == 0)
+    {
+        printf("No barcode found.\n");
+        CBarcodeReader::FreeTextResults(&results);
+    }
+    
+    for (int index = 0; index < results->resultsCount; index++)
+    {
+        EncodableMap map;
+        map[EncodableValue("format")] = results->results[index]->barcodeFormatString;
+        map[EncodableValue("text")] = results->results[index]->barcodeText;
+        map[EncodableValue("x1")] = results->results[index]->localizationResult->x1;
+        map[EncodableValue("y1")] = results->results[index]->localizationResult->y1;
+        map[EncodableValue("x2")] = results->results[index]->localizationResult->x2;
+        map[EncodableValue("y2")] = results->results[index]->localizationResult->y2;
+        map[EncodableValue("x3")] = results->results[index]->localizationResult->x3;
+        map[EncodableValue("y3")] = results->results[index]->localizationResult->y3;
+        map[EncodableValue("x4")] = results->results[index]->localizationResult->x4;
+        map[EncodableValue("y4")] = results->results[index]->localizationResult->y4;
+        out.push_back(map);
+    }
+
+    CBarcodeReader::FreeTextResults(&results);
+    return out;
+}
+
+//CMake Configuration for Flutter Windows Plugin
+link_directories("${PROJECT_SOURCE_DIR}/lib/") 
+target_link_libraries(${PLUGIN_NAME} PRIVATE flutter flutter_wrapper_plugin "DBRx64")
+
+set(flutter_barcode_sdk_bundled_libraries
+  "${PROJECT_SOURCE_DIR}/bin/"
+  PARENT_SCOPE
+)
+
+//Flutter Desktop Barcode Reader for Windows
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_barcode_sdk:
+  @override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dynamsoft Barcode Reader'),
+        ),
+        body: Column(children: [
+          Container(
+            height: 100,
+            child: Row(children: <Widget>[
+              Text(
+                _platformVersion,
+                style: TextStyle(fontSize: 14, color: Colors.black),
+              )
+            ]),
+          ),
+          TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              labelText: 'Input an image path',
+              errorText: _isValid ? null : 'File not exists',
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  getDefaultImage(),
+                  Text(
+                    _barcodeResults,
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            height: 100,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  MaterialButton(
+                      child: Text('Decode Barcode'),
+                      textColor: Colors.white,
+                      color: Colors.blue,
+                      onPressed: () async {
+                        if (_controller.text.isEmpty) {
+                          setState(() {
+                            _isValid = false;
+                            _barcodeResults = '';
+                            _file = '';
+                          });
+                          return;
+                        }
+                        File file = File(_controller.text);
+                        if (!file.existsSync()) {
+                          setState(() {
+                            _isValid = false;
+                            _barcodeResults = '';
+                            _file = '';
+                          });
+                          return;
+                        } else {
+                          setState(() {
+                            _isValid = true;
+                            _file = _controller.text;
+                          });
+                        }
+                        Uint8List bytes = await file.readAsBytes();
+                        List<BarcodeResult> results =
+                            await _barcodeReader.decodeFileBytes(bytes);
+                        setState(() {
+                          _barcodeResults = getBarcodeResults(results);
+                        });
+                      }),
+                ]),
+          ),
+        ])),
+  );
+}
+
+Widget getDefaultImage() {
+  if (_controller.text.isEmpty || !_isValid) {
+    return Image.asset('images/default.png');
+  } else {
+    return Image.file(File(_file));
+  }
+}
+flutter:
+  assets:
+    - images/default.png
+    flutter run -d windows
+    
+  
+  class _DesktopState extends State<Desktop> {
+  String _platformVersion = 'Unknown';
+  final _controller = TextEditingController();
+  String _barcodeResults = '';
+  FlutterBarcodeSdk _barcodeReader;
+  bool _isValid = false;
+  String _file = '';
+
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+    initBarcodeSDK();
+  }
+
+  Future<void> initBarcodeSDK() async {
+    _barcodeReader = FlutterBarcodeSdk();
+    // Get 30-day FREEE trial license from https://www.dynamsoft.com/customer/license/trialLicense?product=dbr
+    await _barcodeReader.setLicense('LICENSE-KEY');
+  }
+}
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Dynamsoft Barcode Reader'),
+        ),
+        body: Column(children: [
+          Container(
+            height: 100,
+            child: Row(children: <Widget>[
+              Text(
+                _platformVersion,
+                style: TextStyle(fontSize: 14, color: Colors.black),
+              )
+            ]),
+          ),
+          TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              labelText: 'Input an image path',
+              errorText: _isValid ? null : 'File not exists',
+            ),
+          ),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  getDefaultImage(),
+                  Text(
+                    _barcodeResults,
+                    style: TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            height: 100,
+            child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: <Widget>[
+                  MaterialButton(
+                      child: Text('Decode Barcode'),
+                      textColor: Colors.white,
+                      color: Colors.blue,
+                      onPressed: () async {
+                        if (_controller.text.isEmpty) {
+                          setState(() {
+                            _isValid = false;
+                            _barcodeResults = '';
+                            _file = '';
+                          });
+                          return;
+                        }
+                        File file = File(_controller.text);
+                        if (!file.existsSync()) {
+                          setState(() {
+                            _isValid = false;
+                            _barcodeResults = '';
+                            _file = '';
+                          });
+                          return;
+                        } else {
+                          setState(() {
+                            _isValid = true;
+                            _file = _controller.text;
+                          });
+                        }
+                        Uint8List bytes = await file.readAsBytes();
+                        List<BarcodeResult> results =
+                            await _barcodeReader.decodeFileBytes(bytes);
+                        setState(() {
+                          _barcodeResults = getBarcodeResults(results);
+                        });
+                      }),
+                ]),
+          ),
+        ])),
+  );
+}
+
+Widget getDefaultImage() {
+  if (_controller.text.isEmpty || !_isValid) {
+    return Image.asset('images/default.png');
+  } else {
+    return Image.file(File(_file));
+  }
+}
+flutter:
+  assets:
+    - images/default.png
+    flutter run -d windows
+    
