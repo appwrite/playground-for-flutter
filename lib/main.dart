@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:appwrite/models.dart';
 
 void main() {
   Client client = Client();
@@ -15,7 +18,6 @@ void main() {
               'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
           .setProject('60793ca4ce59e') // Your project ID
           .setSelfSigned() // Do not use this in production
-      // .addHeader('Origin', 'http://localhost')
       ;
 
   runApp(MaterialApp(
@@ -45,9 +47,9 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  Map<String, dynamic>? user;
-  Map<String, dynamic>? uploadedFile;
-  String? jwt;
+  User? user;
+  File? uploadedFile;
+  Jwt? jwt;
   String? realtimeEvent;
   RealtimeSubscription? subscription;
 
@@ -59,13 +61,13 @@ class PlaygroundState extends State<Playground> {
 
   _getAccount() async {
     try {
-      final response = await widget.account.get();
-      if (response.data['email'] == null || response.data['email'] == '') {
+      user = await widget.account.get();
+      if (user!.email.isEmpty) {
         username = "Anonymous Login";
       } else {
-        username = response.data['name'];
+        username = user!.name;
       }
-      user = response.data;
+      user = user;
       setState(() {});
     } on AppwriteException catch (error) {
       print(error.message);
@@ -88,11 +90,11 @@ class PlaygroundState extends State<Playground> {
             .then((response) {
           widget.storage.createFile(
               file: response,
-              read: [user != null ? "user:${user!['\$id']}" : '*'],
+              read: [user != null ? "user:${user!.$id}" : '*'],
               write: ['*', 'role:member']).then((response) {
             print(response);
             setState(() {
-              uploadedFile = response.data;
+              uploadedFile = response;
             });
           }).catchError((error) {
             print(error.message);
@@ -107,12 +109,12 @@ class PlaygroundState extends State<Playground> {
             MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
           file: uploadFile,
-          read: [user != null ? "user:${user!['\$id']}" : '*'],
+          read: [user != null ? "user:${user!.$id}" : '*'],
           write: ['*', 'role:member'],
         ).then((response) {
           print(response);
           setState(() {
-            uploadedFile = response.data;
+            uploadedFile = response;
           });
         }).catchError((error) {
           print(error.message);
@@ -165,7 +167,7 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () {
                     widget.account.createAnonymousSession().then((value) {
-                      print(value);
+                      print(value.toMap());
                       _getAccount();
                     }).catchError((error) {
                       print(error.message);
@@ -185,9 +187,9 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     widget.account
                         .createSession(
-                            email: 'testuser@appwrite.io', password: 'password')
+                            email: 'user@appwrite.io', password: 'password')
                         .then((value) {
-                      print(value);
+                      print(value.toMap());
                       _getAccount();
                     }).catchError((error) {
                       print(error.message);
@@ -222,16 +224,19 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    widget.database.createDocument(
-                      collectionId: '608faab562521', //change your collection id
-                      data: {'username': 'hello2'},
-                      read: ['*'],
-                      write: ['*'],
-                    ).then((value) {
-                      print(value);
-                    }).catchError((error) {
-                      print(error.message);
-                    }, test: (e) => e is AppwriteException);
+                    widget.database
+                        .createDocument(
+                            collectionId:
+                                '608faab562521', //change your collection id
+                            data: {'username': 'hello2'},
+                            read: ['*'],
+                            write: ['*'])
+                        .then((value) => value.convertTo<MyDocument>((map) =>
+                            MyDocument.fromMap(Map<String, dynamic>.from(map))))
+                        .then((value) => print(value.userName))
+                        .catchError((error) {
+                          print(error.message);
+                        }, test: (e) => e is AppwriteException);
                   }),
               const SizedBox(height: 10.0),
               ElevatedButton(
@@ -255,10 +260,8 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () async {
                     try {
-                      final res = await widget.account.createJWT();
-                      setState(() {
-                        jwt = res.data.toString();
-                      });
+                      jwt = await widget.account.createJWT();
+                      setState(() {});
                     } on AppwriteException catch (e) {
                       print(e.message);
                     }
@@ -268,7 +271,7 @@ class PlaygroundState extends State<Playground> {
               const SizedBox(height: 20.0),
               if (jwt != null) ...[
                 SelectableText(
-                  jwt!,
+                  jwt!.jwt,
                   style: TextStyle(fontSize: 18.0),
                 ),
                 const SizedBox(height: 20.0),
@@ -287,15 +290,7 @@ class PlaygroundState extends State<Playground> {
                     widget.account
                         .createOAuth2Session(provider: 'facebook')
                         .then((value) {
-                      widget.account.get().then((response) {
-                        setState(() {
-                          username = response.data['name'];
-                        });
-                      }).catchError((error) {
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
@@ -316,16 +311,7 @@ class PlaygroundState extends State<Playground> {
                         .createOAuth2Session(
                             provider: 'github', success: '', failure: '')
                         .then((value) {
-                      widget.account.get().then((response) {
-                        setState(() {
-                          username = response.data['name'];
-                        });
-                      }).catchError((error) {
-                        print(error.message);
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
@@ -345,27 +331,17 @@ class PlaygroundState extends State<Playground> {
                     widget.account
                         .createOAuth2Session(provider: 'google')
                         .then((value) {
-                      widget.account.get().then((response) {
-                        setState(() {
-                          username = response.data['name'];
-                        });
-                      }).catchError((error) {
-                        print(error.message);
-                        setState(() {
-                          username = 'Anonymous User';
-                        });
-                      }, test: (e) => e is AppwriteException);
+                      _getAccount();
                     }).catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
                   }),
               if (user != null && uploadedFile != null)
-                FutureBuilder<Response>(
-                  future:
-                      widget.storage.getFileView(fileId: uploadedFile!['\$id']),
+                FutureBuilder<Uint8List>(
+                  future: widget.storage.getFileView(fileId: uploadedFile!.$id),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      return Image.memory(snapshot.data?.data);
+                      return Image.memory(snapshot.data!);
                     }
                     if (snapshot.hasError) {
                       if (snapshot.error is AppwriteException) {
@@ -410,4 +386,45 @@ class PlaygroundState extends State<Playground> {
       ),
     );
   }
+}
+
+class MyDocument {
+  final String userName;
+  final String id;
+  MyDocument({
+    required this.userName,
+    required this.id,
+  });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'userName': userName,
+      'id': id,
+    };
+  }
+
+  factory MyDocument.fromMap(Map<String, dynamic> map) {
+    return MyDocument(
+      userName: map['username'],
+      id: map['\$id'],
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory MyDocument.fromJson(String source) =>
+      MyDocument.fromMap(json.decode(source));
+
+  @override
+  String toString() => 'MyDocument(userName: $userName, id: $id)';
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is MyDocument && other.userName == userName && other.id == id;
+  }
+
+  @override
+  int get hashCode => userName.hashCode ^ id.hashCode;
 }
