@@ -15,8 +15,8 @@ void main() {
 
   client
           .setEndpoint(
-              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('60793ca4ce59e') // Your project ID
+              'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('playground') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -89,6 +89,7 @@ class PlaygroundState extends State<Playground> {
         MultipartFile.fromPath('file', path, filename: file.name)
             .then((response) {
           widget.storage.createFile(
+              fileId: "unique()",
               file: response,
               read: [user != null ? "user:${user!.$id}" : '*'],
               write: ['*', 'role:member']).then((response) {
@@ -108,6 +109,7 @@ class PlaygroundState extends State<Playground> {
         final uploadFile =
             MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
+          fileId: "unique()",
           file: uploadFile,
           read: [user != null ? "user:${user!.$id}" : '*'],
           write: ['*', 'role:member'],
@@ -226,8 +228,8 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     widget.database
                         .createDocument(
-                            collectionId:
-                                '608faab562521', //change your collection id
+                            collectionId: 'users', //change your collection id
+                            documentId: 'unique()',
                             data: {'username': 'hello2'},
                             read: ['*'],
                             write: ['*'])
@@ -288,7 +290,9 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () {
                     widget.account
-                        .createOAuth2Session(provider: 'facebook')
+                        .createOAuth2Session(
+                            provider: 'discord',
+                            success: 'http://localhost:43663/auth.html')
                         .then((value) {
                       _getAccount();
                     }).catchError((error) {
