@@ -16,7 +16,7 @@ void main() {
   client
           .setEndpoint(
               'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('playground') // Your project ID
+          .setProject('playgrounds') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -228,11 +228,12 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     widget.database
                         .createDocument(
-                            collectionId: 'users', //change your collection id
+                            collectionId:
+                                'usernames', //change your collection id
                             documentId: 'unique()',
                             data: {'username': 'hello2'},
-                            read: ['*'],
-                            write: ['*'])
+                            read: ['role:all'],
+                            write: ['role:all'])
                         .then((value) => value.convertTo<MyDocument>((map) =>
                             MyDocument.fromMap(Map<String, dynamic>.from(map))))
                         .then((value) => print(value.userName))
