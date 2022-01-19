@@ -15,8 +15,8 @@ void main() {
 
   client
           .setEndpoint(
-              'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('playgrounds') // Your project ID
+              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('[YOUR PROJECT ID]') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
