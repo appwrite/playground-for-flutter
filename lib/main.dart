@@ -86,20 +86,17 @@ class PlaygroundState extends State<Playground> {
       if (!kIsWeb) {
         final path = file.path;
         if (path == null) return;
-        MultipartFile.fromPath('file', path, filename: file.name)
-            .then((response) {
-          widget.storage.createFile(
-              fileId: "unique()",
-              file: response,
-              read: [user != null ? "user:${user!.$id}" : '*'],
-              write: ['*', 'role:member']).then((response) {
-            print(response);
-            setState(() {
-              uploadedFile = response;
-            });
-          }).catchError((error) {
-            print(error.message);
-          }, test: (e) => e is AppwriteException);
+        InputFile inFile = InputFile(path: file.path, filename: file.name);
+        widget.storage.createFile(
+            bucketId: 'testbucket',
+            fileId: "unique()",
+            file: inFile,
+            read: [user != null ? "user:${user!.$id}" : '*'],
+            write: ['*', 'role:member']).then((response) {
+          print(response);
+          setState(() {
+            uploadedFile = response;
+          });
         }).catchError((error) {
           print(error.message);
         }, test: (e) => e is AppwriteException);
@@ -109,8 +106,9 @@ class PlaygroundState extends State<Playground> {
         final uploadFile =
             MultipartFile.fromBytes('file', bytes!, filename: file.name);
         widget.storage.createFile(
+          bucketId: 'testbucket',
           fileId: "unique()",
-          file: uploadFile,
+          file: InputFile(file: uploadFile),
           read: [user != null ? "user:${user!.$id}" : '*'],
           write: ['*', 'role:member'],
         ).then((response) {
@@ -343,7 +341,7 @@ class PlaygroundState extends State<Playground> {
                   }),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Uint8List>(
-                  future: widget.storage.getFileView(fileId: uploadedFile!.$id),
+                  future: widget.storage.getFilePreview(bucketId: 'testbucket', fileId: uploadedFile!.$id, width: 300),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data!);
