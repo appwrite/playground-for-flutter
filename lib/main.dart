@@ -8,6 +8,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:appwrite/models.dart';
 
 void main() {
+  // required if you are initializing your client in main() like we do here
+  WidgetsFlutterBinding.ensureInitialized();
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
