@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,7 +11,7 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Database database = Database(client);
+  Databases databases = Databases(client);
 
   client
           .setEndpoint(
@@ -27,7 +25,7 @@ void main() {
       client: client,
       account: account,
       storage: storage,
-      database: database,
+      database: databases,
     ),
   ));
 }
@@ -41,7 +39,7 @@ class Playground extends StatefulWidget {
   final Client client;
   final Account account;
   final Storage storage;
-  final Database database;
+  final Databases database;
 
   @override
   PlaygroundState createState() => PlaygroundState();
@@ -79,52 +77,39 @@ class PlaygroundState extends State<Playground> {
     }
   }
 
-  _uploadFile() {
-    FilePicker.platform
-        .pickFiles(type: FileType.image, allowMultiple: false)
-        .then((response) {
+  _uploadFile() async {
+    try {
+      final response = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+      );
       if (response == null) return;
-      final file = response.files.single;
-      if (!kIsWeb) {
-        final path = file.path;
-        if (path == null) return;
-        InputFile inFile = InputFile(path: file.path, filename: file.name);
-        widget.storage.createFile(
-            bucketId: 'testbucket',
-            fileId: "unique()",
-            file: inFile,
-            read: [user != null ? "user:${user!.$id}" : '*'],
-            write: ['*', 'role:member']).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      } else {
-        if (file.bytes == null) return;
-        List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile =
-            MultipartFile.fromBytes('file', bytes!, filename: file.name);
-        widget.storage.createFile(
-          bucketId: 'testbucket',
-          fileId: "unique()",
-          file: InputFile(file: uploadFile),
-          read: [user != null ? "user:${user!.$id}" : '*'],
-          write: ['*', 'role:member'],
-        ).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      }
-    }).catchError((error) {
-      print(error);
-    });
+      final pickedFile = response.files.single;
+      if (pickedFile.path == null && pickedFile.bytes == null) return;
+
+      final path = pickedFile.path;
+      if (path == null) return;
+      InputFile inFile = InputFile(
+        path: pickedFile.path,
+        filename: pickedFile.name,
+        bytes: pickedFile.bytes,
+      );
+      final file = await widget.storage.createFile(
+        bucketId: 'testbucket',
+        fileId: "unique()",
+        file: inFile,
+        read: [user != null ? "user:${user!.$id}" : '*'],
+        write: ['*', 'role:member'],
+      );
+      print(file);
+      setState(() {
+        uploadedFile = file;
+      });
+    } on AppwriteException catch (e) {
+      print(e.message);
+    } catch (e) {
+      print(e);
+    }
   }
 
   _subscribe() {
@@ -158,23 +143,24 @@ class PlaygroundState extends State<Playground> {
             children: <Widget>[
               Padding(padding: EdgeInsets.all(20.0)),
               ElevatedButton(
-                  child: Text(
-                    "Anonymous Login",
-                    style: TextStyle(color: Colors.black, fontSize: 20.0),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    primary: Colors.grey,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: Size(280, 50),
-                  ),
-                  onPressed: () {
-                    widget.account.createAnonymousSession().then((value) {
-                      print(value.toMap());
-                      _getAccount();
-                    }).catchError((error) {
-                      print(error.message);
-                    }, test: (e) => e is AppwriteException);
-                  }),
+                child: Text(
+                  "Anonymous Login",
+                  style: TextStyle(color: Colors.black, fontSize: 20.0),
+                ),
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.grey,
+                  padding: const EdgeInsets.all(16),
+                  minimumSize: Size(280, 50),
+                ),
+                onPressed: () async {
+                  try {
+                    await widget.account.createAnonymousSession();
+                    _getAccount();
+                  } on AppwriteException catch (e) {
+                    print(e.message);
+                  }
+                },
+              ),
               const SizedBox(height: 10.0),
               ElevatedButton(
                   child: Text(
@@ -186,16 +172,17 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                     minimumSize: Size(280, 50),
                   ),
-                  onPressed: () {
-                    widget.account
-                        .createSession(
-                            email: 'user@appwrite.io', password: 'password')
-                        .then((value) {
-                      print(value.toMap());
+                  onPressed: () async {
+                    try {
+                      await widget.account.createEmailSession(
+                        email: 'user@appwrite.io',
+                        password: 'password',
+                      );
                       _getAccount();
-                    }).catchError((error) {
-                      print(error.message);
-                    }, test: (e) => e is AppwriteException);
+                      print(user);
+                    } on AppwriteException catch (e) {
+                      print(e.message);
+                    }
                   }),
               Padding(padding: EdgeInsets.all(20.0)),
               ElevatedButton(
@@ -225,21 +212,20 @@ class PlaygroundState extends State<Playground> {
                     primary: Colors.blue,
                     padding: const EdgeInsets.all(16),
                   ),
-                  onPressed: () {
-                    widget.database
-                        .createDocument(
-                            collectionId:
-                                'usernames', //change your collection id
-                            documentId: 'unique()',
-                            data: {'username': 'hello2'},
-                            read: ['role:all'],
-                            write: ['role:all'])
-                        .then((value) => value.convertTo<MyDocument>((map) =>
-                            MyDocument.fromMap(Map<String, dynamic>.from(map))))
-                        .then((value) => print(value.userName))
-                        .catchError((error) {
-                          print(error.message);
-                        }, test: (e) => e is AppwriteException);
+                  onPressed: () async {
+                    try {
+                      final document = await widget.database.createDocument(
+                        databaseId: 'default',
+                        collectionId: 'usernames', //change your collection id
+                        documentId: 'unique()',
+                        data: {'username': 'hello2'},
+                        read: ['role:all'],
+                        write: ['role:all'],
+                      );
+                      print(document.toMap());
+                    } on AppwriteException catch (e) {
+                      print(e.message);
+                    }
                   }),
               const SizedBox(height: 10.0),
               ElevatedButton(
@@ -289,16 +275,16 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                     minimumSize: Size(280, 50),
                   ),
-                  onPressed: () {
-                    widget.account
-                        .createOAuth2Session(
-                            provider: 'discord',
-                            success: 'http://localhost:43663/auth.html')
-                        .then((value) {
+                  onPressed: () async {
+                    try {
+                      await widget.account.createOAuth2Session(
+                        provider: 'discord',
+                        success: 'http://localhost:43663/auth.html',
+                      );
                       _getAccount();
-                    }).catchError((error) {
-                      print(error.message);
-                    }, test: (e) => e is AppwriteException);
+                    } on AppwriteException catch (e) {
+                      print(e.message);
+                    }
                   }),
               Padding(padding: EdgeInsets.all(10.0)),
               ElevatedButton(
@@ -343,7 +329,10 @@ class PlaygroundState extends State<Playground> {
                   }),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Uint8List>(
-                  future: widget.storage.getFilePreview(bucketId: 'testbucket', fileId: uploadedFile!.$id, width: 300),
+                  future: widget.storage.getFilePreview(
+                      bucketId: 'testbucket',
+                      fileId: uploadedFile!.$id,
+                      width: 300),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data!);
