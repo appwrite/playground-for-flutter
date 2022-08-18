@@ -11,7 +11,7 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Databases databases = Databases(client);
+  Databases databases = Databases(client, databaseId: 'default');
 
   client
           .setEndpoint(
@@ -215,7 +215,6 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () async {
                     try {
                       final document = await widget.database.createDocument(
-                        databaseId: 'default',
                         collectionId: 'usernames', //change your collection id
                         documentId: 'unique()',
                         data: {'username': 'hello2'},
