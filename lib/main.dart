@@ -85,21 +85,25 @@ class PlaygroundState extends State<Playground> {
       );
       if (response == null) return;
       final pickedFile = response.files.single;
-      if (pickedFile.path == null && pickedFile.bytes == null) return;
-
-      final path = pickedFile.path;
-      if (path == null) return;
-      InputFile inFile = InputFile(
-        path: pickedFile.path,
-        filename: pickedFile.name,
-        bytes: pickedFile.bytes,
-      );
+      late InputFile inFile;
+      if (kIsWeb) {
+        inFile = InputFile(
+          filename: pickedFile.name,
+          bytes: pickedFile.bytes,
+        );
+      } else {
+        inFile = InputFile(
+          path: pickedFile.path,
+          filename: pickedFile.name,
+          bytes: pickedFile.bytes,
+        );
+      }
       final file = await widget.storage.createFile(
         bucketId: 'testbucket',
         fileId: "unique()",
         file: inFile,
-        read: [user != null ? "user:${user!.$id}" : '*'],
-        write: ['*', 'role:member'],
+        read: [user != null ? "user:${user!.$id}" : 'role:all'],
+        write: ['role:member'],
       );
       print(file);
       setState(() {
