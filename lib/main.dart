@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:appwrite/models.dart';
+import 'package:flutter_dropzone/flutter_dropzone.dart';
 
 void main() {
   // required if you are initializing your client in main() like we do here
@@ -13,12 +14,12 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Database database = Database(client);
+  Databases database = Databases(client, databaseId: 'default');
 
   client
           .setEndpoint(
-              'https://localhost/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject('[YOUR PROJECT ID]') // Your project ID
+              'https://demo.appwrite.io/v1') // Make sure your endpoint is accessible from your emulator, use IP if needed
+          .setProject('playgrounds') // Your project ID
           .setSelfSigned() // Do not use this in production
       ;
 
@@ -41,7 +42,7 @@ class Playground extends StatefulWidget {
   final Client client;
   final Account account;
   final Storage storage;
-  final Database database;
+  final Databases database;
 
   @override
   PlaygroundState createState() => PlaygroundState();
@@ -54,6 +55,7 @@ class PlaygroundState extends State<Playground> {
   Jwt? jwt;
   String? realtimeEvent;
   RealtimeSubscription? subscription;
+  DropzoneViewController? controller;
 
   @override
   void initState() {
@@ -79,49 +81,32 @@ class PlaygroundState extends State<Playground> {
     }
   }
 
+  _createFile({List<int>? data, String? path, String? filename}) {
+    InputFile inFile =
+        InputFile(bytes: data, filename: filename, path: kIsWeb ? null : path);
+    widget.storage.createFile(
+      bucketId: 'testbucket',
+      fileId: "unique()",
+      file: inFile,
+      read: [user != null ? "user:${user!.$id}" : 'role:all'],
+      write: ['role:all', 'role:member'],
+    ).then((response) {
+      print(response);
+      setState(() {
+        uploadedFile = response;
+      });
+    }).catchError((error) {
+      print(error.message);
+    }, test: (e) => e is AppwriteException);
+  }
+
   _uploadFile() {
     FilePicker.platform
         .pickFiles(type: FileType.image, allowMultiple: false)
         .then((response) {
       if (response == null) return;
       final file = response.files.single;
-      if (!kIsWeb) {
-        final path = file.path;
-        if (path == null) return;
-        InputFile inFile = InputFile(path: file.path, filename: file.name);
-        widget.storage.createFile(
-            bucketId: 'testbucket',
-            fileId: "unique()",
-            file: inFile,
-            read: [user != null ? "user:${user!.$id}" : '*'],
-            write: ['*', 'role:member']).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      } else {
-        if (file.bytes == null) return;
-        List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile =
-            MultipartFile.fromBytes('file', bytes!, filename: file.name);
-        widget.storage.createFile(
-          bucketId: 'testbucket',
-          fileId: "unique()",
-          file: InputFile(file: uploadFile),
-          read: [user != null ? "user:${user!.$id}" : '*'],
-          write: ['*', 'role:member'],
-        ).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      }
+      _createFile(data: file.bytes, path: file.path, filename: file.name);
     }).catchError((error) {
       print(error);
     });
@@ -188,7 +173,7 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () {
                     widget.account
-                        .createSession(
+                        .createEmailSession(
                             email: 'user@appwrite.io', password: 'password')
                         .then((value) {
                       print(value.toMap());
@@ -255,6 +240,28 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     _uploadFile();
                   }),
+              if (kIsWeb) ...[
+                const SizedBox(height: 10.0),
+                SizedBox(
+                  height: 100,
+                  child: DropzoneView(
+                    operation: DragOperation.copy,
+                    cursor: CursorType.grab,
+                    onCreated: (DropzoneViewController ctrl) =>
+                        controller = ctrl,
+                    onLoaded: () => print('Zone loaded'),
+                    onError: (String? ev) => print('Error: $ev'),
+                    onHover: () => print('Zone hovered'),
+                    onDrop: (dynamic ev) async {
+                      final data = await controller!.getFileData(ev);
+                      _createFile(data: data, filename: 'droppedfile.jpg');
+                    },
+                    onDropMultiple: (List<dynamic>? ev) {},
+                    onLeave: () => print('Zone left'),
+                  ),
+                ),
+                const SizedBox(height: 10),
+              ],
               Padding(padding: EdgeInsets.all(20.0)),
               ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -343,7 +350,10 @@ class PlaygroundState extends State<Playground> {
                   }),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Uint8List>(
-                  future: widget.storage.getFilePreview(bucketId: 'testbucket', fileId: uploadedFile!.$id, width: 300),
+                  future: widget.storage.getFilePreview(
+                      bucketId: 'testbucket',
+                      fileId: uploadedFile!.$id,
+                      width: 300),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data!);
