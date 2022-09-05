@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:appwrite/models.dart';
+import 'package:appwrite/models.dart' as models;
 
 void main() {
   // required if you are initializing your client in main() like we do here
@@ -13,7 +13,7 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Database database = Database(client);
+  Databases database = Databases(client);
 
   client
           .setEndpoint(
@@ -27,7 +27,7 @@ void main() {
       client: client,
       account: account,
       storage: storage,
-      database: database,
+      databases: database,
     ),
   ));
 }
@@ -37,11 +37,11 @@ class Playground extends StatefulWidget {
       {required this.client,
       required this.account,
       required this.storage,
-      required this.database});
+      required this.databases});
   final Client client;
   final Account account;
   final Storage storage;
-  final Database database;
+  final Databases databases;
 
   @override
   PlaygroundState createState() => PlaygroundState();
@@ -49,9 +49,9 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  User? user;
-  File? uploadedFile;
-  Jwt? jwt;
+  models.Account? user;
+  models.File? uploadedFile;
+  models.Jwt? jwt;
   String? realtimeEvent;
   RealtimeSubscription? subscription;
 
@@ -85,43 +85,27 @@ class PlaygroundState extends State<Playground> {
         .then((response) {
       if (response == null) return;
       final file = response.files.single;
-      if (!kIsWeb) {
-        final path = file.path;
-        if (path == null) return;
-        InputFile inFile = InputFile(path: file.path, filename: file.name);
-        widget.storage.createFile(
-            bucketId: 'testbucket',
-            fileId: "unique()",
-            file: inFile,
-            read: [user != null ? "user:${user!.$id}" : '*'],
-            write: ['*', 'role:member']).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      } else {
-        if (file.bytes == null) return;
-        List<int>? bytes = file.bytes?.map((i) => i).toList();
-        final uploadFile =
-            MultipartFile.fromBytes('file', bytes!, filename: file.name);
-        widget.storage.createFile(
-          bucketId: 'testbucket',
-          fileId: "unique()",
-          file: InputFile(file: uploadFile),
-          read: [user != null ? "user:${user!.$id}" : '*'],
-          write: ['*', 'role:member'],
-        ).then((response) {
-          print(response);
-          setState(() {
-            uploadedFile = response;
-          });
-        }).catchError((error) {
-          print(error.message);
-        }, test: (e) => e is AppwriteException);
-      }
+      InputFile inFile = InputFile(
+          path: kIsWeb ? null : file.path,
+          bytes: file.bytes,
+          filename: file.name);
+      widget.storage.createFile(
+        bucketId: 'testbucket',
+        fileId: "unique()",
+        file: inFile,
+        permissions: [
+          Permission.read(user != null ? Role.user(user!.$id) : Role.any()),
+          Permission.update(Role.any()),
+          Permission.update(Role.users())
+        ],
+      ).then((response) {
+        print(response);
+        setState(() {
+          uploadedFile = response;
+        });
+      }).catchError((error) {
+        print(error.message);
+      }, test: (e) => e is AppwriteException);
     }).catchError((error) {
       print(error);
     });
@@ -188,7 +172,7 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () {
                     widget.account
-                        .createSession(
+                        .createEmailSession(
                             email: 'user@appwrite.io', password: 'password')
                         .then((value) {
                       print(value.toMap());
@@ -226,14 +210,17 @@ class PlaygroundState extends State<Playground> {
                     padding: const EdgeInsets.all(16),
                   ),
                   onPressed: () {
-                    widget.database
+                    widget.databases
                         .createDocument(
-                            collectionId:
-                                'usernames', //change your collection id
-                            documentId: 'unique()',
-                            data: {'username': 'hello2'},
-                            read: ['role:all'],
-                            write: ['role:all'])
+                          databaseId: 'default',
+                          collectionId: 'usernames', //change your collection id
+                          documentId: 'unique()',
+                          data: {'username': 'hello2'},
+                          permissions: [
+                            Permission.read(Role.any()),
+                            Permission.write(Role.any()),
+                          ],
+                        )
                         .then((value) => value.convertTo<MyDocument>((map) =>
                             MyDocument.fromMap(Map<String, dynamic>.from(map))))
                         .then((value) => print(value.userName))
@@ -343,7 +330,10 @@ class PlaygroundState extends State<Playground> {
                   }),
               if (user != null && uploadedFile != null)
                 FutureBuilder<Uint8List>(
-                  future: widget.storage.getFilePreview(bucketId: 'testbucket', fileId: uploadedFile!.$id, width: 300),
+                  future: widget.storage.getFilePreview(
+                      bucketId: 'testbucket',
+                      fileId: uploadedFile!.$id,
+                      width: 300),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
                       return Image.memory(snapshot.data!);
