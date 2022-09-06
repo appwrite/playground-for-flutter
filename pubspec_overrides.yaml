@@ -1,5 +1,0 @@
-dependency_overrides:
-  appwrite:
-    git:
-      url: https://github.com/appwrite/sdk-for-flutter
-      ref: dev
