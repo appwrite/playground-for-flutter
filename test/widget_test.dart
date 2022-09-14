@@ -14,7 +14,7 @@ void main() {
   testWidgets('Playground loads', (WidgetTester tester) async {
     Client client = Client();
     Account account = Account(client);
-    Databases databases = Databases(client, databaseId: 'default');
+    Databases databases = Databases(client);
     Storage storage = Storage(client);
     // Build our app and trigger a frame.
     await tester.pumpWidget(MaterialApp(

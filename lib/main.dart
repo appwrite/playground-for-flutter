@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:appwrite/appwrite.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:appwrite/models.dart';
+import 'package:appwrite/models.dart' as Models;
 
 void main() {
   // required if you are initializing your client in main() like we do here
@@ -12,7 +12,7 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Databases databases = Databases(client, databaseId: 'default');
+  Databases databases = Databases(client);
 
   client
           .setEndpoint(
@@ -48,9 +48,9 @@ class Playground extends StatefulWidget {
 
 class PlaygroundState extends State<Playground> {
   String username = "Loading...";
-  User? user;
-  File? uploadedFile;
-  Jwt? jwt;
+  Models.Account? user;
+  Models.File? uploadedFile;
+  Models.Jwt? jwt;
   String? realtimeEvent;
   RealtimeSubscription? subscription;
 
@@ -103,8 +103,10 @@ class PlaygroundState extends State<Playground> {
         bucketId: 'testbucket',
         fileId: "unique()",
         file: inFile,
-        read: [user != null ? "user:${user!.$id}" : 'role:all'],
-        write: ['role:member'],
+        permissions: [
+          Permission.read(user != null ? Role.user(user!.$id) : Role.any()),
+          Permission.write(Role.users())
+        ],
       );
       print(file);
       setState(() {
@@ -220,11 +222,14 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () async {
                     try {
                       final document = await widget.database.createDocument(
+                        databaseId: 'default',
                         collectionId: 'usernames', //change your collection id
                         documentId: 'unique()',
                         data: {'username': 'hello2'},
-                        read: ['role:all'],
-                        write: ['role:all'],
+                        permissions: [
+                          Permission.read(Role.any()),
+                          Permission.write(Role.any()),
+                        ],
                       );
                       print(document.toMap());
                     } on AppwriteException catch (e) {
