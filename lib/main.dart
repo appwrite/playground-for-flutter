@@ -100,8 +100,8 @@ class PlaygroundState extends State<Playground> {
         );
       }
       final file = await widget.storage.createFile(
-        bucketId: 'testbucket',
-        fileId: "unique()",
+        bucketId: ID.custom('testbucket'),
+        fileId: ID.unique(),
         file: inFile,
         permissions: [
           Permission.read(user != null ? Role.user(user!.$id) : Role.any()),
@@ -222,9 +222,10 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () async {
                     try {
                       final document = await widget.database.createDocument(
-                        databaseId: 'default',
-                        collectionId: 'usernames', //change your collection id
-                        documentId: 'unique()',
+                        databaseId: ID.custom('default'),
+                        collectionId:
+                            ID.custom('usernames'), //change your collection id
+                        documentId: ID.unique(),
                         data: {'username': 'hello2'},
                         permissions: [
                           Permission.read(Role.any()),
