@@ -21,8 +21,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  appwrite: ^5.0.0
-  file_picker: ^4.5.1
+  appwrite: ^8.0.0
+  file_picker: ^5.0.1
 
 dev_dependencies:
   flutter_test:
