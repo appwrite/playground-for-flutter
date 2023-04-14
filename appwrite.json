@@ -1,0 +1,60 @@
+{
+    "projectId": "playground-for-flutter",
+    "projectName": "Playground for Flutter",
+    "databases": [
+        {
+            "$id": "default",
+            "name": "Default",
+            "$createdAt": "2023-04-14T20:34:09.843+00:00",
+            "$updatedAt": "2023-04-14T20:34:09.843+00:00"
+        }
+    ],
+    "collections": [
+        {
+            "$id": "usernames",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "databaseId": "default",
+            "name": "Usernames",
+            "enabled": true,
+            "documentSecurity": false,
+            "attributes": [
+                {
+                    "key": "username",
+                    "type": "string",
+                    "status": "available",
+                    "required": true,
+                    "array": false,
+                    "size": 50,
+                    "default": null
+                }
+            ],
+            "indexes": []
+        }
+    ],
+    "buckets": [
+        {
+            "$id": "testBucket",
+            "$createdAt": "2023-04-14T20:33:53.174+00:00",
+            "$updatedAt": "2023-04-14T20:33:59.949+00:00",
+            "$permissions": [
+                "create(\"any\")",
+                "read(\"any\")",
+                "update(\"any\")",
+                "delete(\"any\")"
+            ],
+            "fileSecurity": false,
+            "name": "Test Bucket",
+            "enabled": true,
+            "maximumFileSize": 30000000,
+            "allowedFileExtensions": [],
+            "compression": "none",
+            "encryption": true,
+            "antivirus": true
+        }
+    ]
+}
