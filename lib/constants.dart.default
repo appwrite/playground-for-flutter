@@ -1,0 +1,5 @@
+const endpoint = 'https://localhost/v1';
+const project = 'playground-for-flutter';
+const databaseId = 'default';
+const bucketId = 'testBucket';
+const collectionId = 'usernames';
