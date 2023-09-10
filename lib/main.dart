@@ -58,7 +58,9 @@ class PlaygroundState extends State<Playground> {
   Jwt? jwt;
   String? realtimeEvent;
   RealtimeSubscription? subscription;
+  RealtimeSubscription? subscription2;
   final Uri? location = href == null ? null : Uri.parse(href!);
+  String fileId = '644f756980c4c0dbacec';
 
   @override
   void initState() {
@@ -133,6 +135,12 @@ class PlaygroundState extends State<Playground> {
       setState(() {
         realtimeEvent = jsonEncode(data.toMap());
       });
+    });
+
+    subscription2 = realtime.subscribe(['documents']);
+
+    subscription2!.stream.listen((event) {
+      print(event);
     });
   }
 
@@ -349,25 +357,25 @@ class PlaygroundState extends State<Playground> {
                     "Login with Google",
                     style: TextStyle(color: Colors.white, fontSize: 20.0),
                   )),
-              if (user != null && uploadedFile != null)
-                FutureBuilder<Uint8List>(
-                  future: widget.storage.getFilePreview(
-                      bucketId: ID.custom(bucketId),
-                      fileId: ID.custom(uploadedFile!.$id),
-                      width: 300),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Image.memory(snapshot.data!);
-                    }
-                    if (snapshot.hasError) {
-                      if (snapshot.error is AppwriteException) {
-                        print((snapshot.error as AppwriteException).message);
-                      }
-                      print(snapshot.error);
-                    }
-                    return const CircularProgressIndicator();
-                  },
-                ),
+              // if (user != null )//&& uploadedFile != null)
+              // FutureBuilder<String>(
+              //   future: widget.storage.getFilePreview(
+              //       bucketId: ID.custom(bucketId),
+              //       fileId: ID.custom(fileId),
+              //       width: 300),
+              //   builder: (context, snapshot) {
+              //     if (snapshot.hasData) {
+              //       return Image.network(snapshot.data!);
+              //     }
+              //     if (snapshot.hasError) {
+              //       if (snapshot.error is AppwriteException) {
+              //         print((snapshot.error as AppwriteException).message);
+              //       }
+              //       print(snapshot.error);
+              //     }
+              //     return const CircularProgressIndicator();
+              //   },
+              // ),
               const Padding(padding: EdgeInsets.all(20.0)),
               const Divider(),
               const Padding(padding: EdgeInsets.all(20.0)),
