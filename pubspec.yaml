@@ -21,7 +21,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  appwrite: ^9.0.0
+  appwrite: ^11.0.0
   file_picker: ^5.0.1
   window_location_href: ^1.0.1+2
 
@@ -30,11 +30,12 @@ dev_dependencies:
     sdk: flutter
   flutter_lints:
 
-# dependency_overrides:
-#   appwrite:
-#     git:
-#       url: https://github.com/appwrite/sdk-for-flutter.git
-#       ref: fix-websocket-issue
+dependency_overrides:
+  appwrite:
+    path: /Users/steven/Projects/appwrite-sdk-generator/examples/flutter
+    # git:
+    #   url: https://github.com/appwrite/sdk-for-flutter.git
+    #   ref: fix-realtime-multiple-subscription
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

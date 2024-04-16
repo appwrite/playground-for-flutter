@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +17,7 @@ void main() {
   Account account = Account(client);
   Storage storage = Storage(client);
   Databases databases = Databases(client);
+  Realtime realtime = Realtime(client);
 
   client
           .setEndpoint(
@@ -30,6 +32,7 @@ void main() {
       account: account,
       storage: storage,
       database: databases,
+      realtime: realtime,
     ),
   ));
 }
@@ -41,11 +44,13 @@ class Playground extends StatefulWidget {
     required this.account,
     required this.storage,
     required this.database,
+    required this.realtime,
   }) : super(key: key);
   final Client client;
   final Account account;
   final Storage storage;
   final Databases database;
+  final Realtime realtime;
 
   @override
   PlaygroundState createState() => PlaygroundState();
@@ -57,8 +62,7 @@ class PlaygroundState extends State<Playground> {
   File? uploadedFile;
   Jwt? jwt;
   String? realtimeEvent;
-  RealtimeSubscription? subscription;
-  RealtimeSubscription? subscription2;
+  Map<int, RealtimeSubscription> subscriptions = {};
   final Uri? location = href == null ? null : Uri.parse(href!);
   String fileId = '644f756980c4c0dbacec';
 
@@ -66,6 +70,22 @@ class PlaygroundState extends State<Playground> {
   void initState() {
     _getAccount();
     super.initState();
+    _listAndSubscribe();
+  }
+
+  _listAndSubscribe() async {
+    try {
+      final document = await widget.database.listDocuments(
+        databaseId: ID.custom(databaseId),
+        collectionId: ID.custom(collectionId), //change your collection id
+      );
+      for (var doc in document.documents) {
+        _subscribe(
+            ['databases.default.collections.usernames.documents.${doc.$id}']);
+      }
+    } on AppwriteException catch (e) {
+      print(e.message);
+    }
   }
 
   _getAccount() async {
@@ -126,10 +146,15 @@ class PlaygroundState extends State<Playground> {
     }
   }
 
-  _subscribe() {
-    final realtime = Realtime(widget.client);
-    subscription = realtime.subscribe(['files', 'documents']);
-    setState(() {});
+  _getHashCode(List<String> channels) {
+    return channels
+        .map((e) => e.hashCode)
+        .reduce((value, element) => value.hashCode ^ element.hashCode);
+  }
+
+  _subscribe(List<String> channels) {
+    // final realtime = Realtime(widget.client);
+    final subscription = widget.realtime.subscribe(channels);
     subscription!.stream.listen((data) {
       print(data);
       setState(() {
@@ -137,18 +162,21 @@ class PlaygroundState extends State<Playground> {
       });
     });
 
-    subscription2 = realtime.subscribe(['documents']);
-
-    subscription2!.stream.listen((event) {
-      print(event);
+    setState(() {
+      final hashCode = _getHashCode(channels);
+      subscriptions[hashCode] = subscription;
     });
   }
 
-  _unsubscribe() {
-    subscription?.close();
-    setState(() {
-      subscription = null;
-    });
+  _unsubscribe(List<String> channels) {
+    final hashCode = _getHashCode(channels);
+
+    if (subscriptions.containsKey(hashCode)) {
+      subscriptions[hashCode]!.close();
+      setState(() {
+        subscriptions.remove(hashCode);
+      });
+    }
   }
 
   @override
@@ -190,7 +218,7 @@ class PlaygroundState extends State<Playground> {
                   ),
                   onPressed: () async {
                     try {
-                      await widget.account.createEmailSession(
+                      await widget.account.createEmailPasswordSession(
                         email: 'user@appwrite.io',
                         password: 'password',
                       );
@@ -211,9 +239,43 @@ class PlaygroundState extends State<Playground> {
                   backgroundColor: Colors.blue,
                   padding: const EdgeInsets.all(16),
                 ),
-                onPressed: subscription != null ? _unsubscribe : _subscribe,
+                onPressed: () {
+                  for (var subscription in subscriptions.values) {
+                    subscription.close();
+                  }
+                  setState(() {
+                    subscriptions.clear();
+                  });
+                },
+                child: const Text(
+                  "Unsubscribe All",
+                  style: TextStyle(color: Colors.white, fontSize: 20.0),
+                ),
+              ),
+              const Padding(padding: EdgeInsets.all(10.0)),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(280, 50),
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.all(16),
+                ),
+                onPressed: () {
+                  final channels = [
+                    'databases.default.collections.usernames.documents'
+                  ];
+                  final hashCode = _getHashCode(channels);
+                  if (subscriptions.containsKey(hashCode)) {
+                    _unsubscribe(channels);
+                  } else {
+                    _subscribe(channels);
+                  }
+                },
                 child: Text(
-                  subscription != null ? "Unsubscribe" : "Subscribe",
+                  (subscriptions.containsKey(_getHashCode([
+                    'databases.default.collections.usernames.documents'
+                  ])))
+                      ? "Unsubscribe"
+                      : "Subscribe",
                   style: const TextStyle(color: Colors.white, fontSize: 20.0),
                 ),
               ),
@@ -242,12 +304,42 @@ class PlaygroundState extends State<Playground> {
                         ],
                       );
                       print(document.toMap());
+                      _subscribe([
+                        'databases.default.collections.usernames.documents.${document.$id}'
+                      ]);
                     } on AppwriteException catch (e) {
                       print(e.message);
                     }
                   },
                   child: const Text(
                     "Create Doc",
+                    style: TextStyle(color: Colors.white, fontSize: 20.0),
+                  )),
+              const SizedBox(height: 10.0),
+              ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(280, 50),
+                    backgroundColor: Colors.blue,
+                    padding: const EdgeInsets.all(16),
+                  ),
+                  onPressed: () async {
+                    try {
+                      final document = await widget.database.listDocuments(
+                        databaseId: ID.custom(databaseId),
+                        collectionId:
+                            ID.custom(collectionId), //change your collection id
+                      );
+                      for (var doc in document.documents) {
+                        _subscribe([
+                          'databases.default.collections.usernames.documents.${doc.$id}'
+                        ]);
+                      }
+                    } on AppwriteException catch (e) {
+                      print(e.message);
+                    }
+                  },
+                  child: const Text(
+                    "List Docs",
                     style: TextStyle(color: Colors.white, fontSize: 20.0),
                   )),
               const SizedBox(height: 10.0),
@@ -297,7 +389,7 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () async {
                     try {
                       await widget.account.createOAuth2Session(
-                        provider: 'discord',
+                        provider: OAuthProvider.discord,
                         success:
                             kIsWeb ? '${location?.origin}/auth.html' : null,
                       );
@@ -320,7 +412,7 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     widget.account
                         .createOAuth2Session(
-                            provider: 'github',
+                            provider: OAuthProvider.github,
                             success:
                                 kIsWeb ? '${location?.origin}/auth.html' : null,
                             failure: '')
@@ -344,7 +436,7 @@ class PlaygroundState extends State<Playground> {
                   onPressed: () {
                     widget.account
                         .createOAuth2Session(
-                            provider: 'google',
+                            provider: OAuthProvider.google,
                             success:
                                 kIsWeb ? '${location?.origin}/auth.html' : null)
                         .then((value) {
