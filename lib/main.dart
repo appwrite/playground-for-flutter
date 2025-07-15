@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:appwrite/appwrite.dart';
+import 'package:appwrite/enums.dart';
 import 'package:appwrite/models.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -18,20 +19,25 @@ void main() {
   Databases databases = Databases(client);
 
   client
-          .setEndpoint(
-              endpoint) // Make sure your endpoint is accessible from your emulator, use IP if needed
-          .setProject(project) // Your project ID
-          .setSelfSigned() // Do not use this in production
-      ;
+      .setEndpoint(
+        endpoint,
+      ) // Make sure your endpoint is accessible from your emulator, use IP if needed
+      .setProject(project); // Your project ID
 
-  runApp(MaterialApp(
-    home: Playground(
-      client: client,
-      account: account,
-      storage: storage,
-      database: databases,
+  if (devKey.isNotEmpty) {
+    client.setDevKey(devKey);
+  }
+
+  runApp(
+    MaterialApp(
+      home: Playground(
+        client: client,
+        account: account,
+        storage: storage,
+        database: databases,
+      ),
     ),
-  ));
+  );
 }
 
 class Playground extends StatefulWidget {
@@ -63,6 +69,7 @@ class PlaygroundState extends State<Playground> {
   @override
   void initState() {
     _getAccount();
+    widget.client.ping();
     super.initState();
   }
 
@@ -110,7 +117,7 @@ class PlaygroundState extends State<Playground> {
         file: inFile,
         permissions: [
           Permission.read(user != null ? Role.user(user!.$id) : Role.any()),
-          Permission.write(Role.users())
+          Permission.write(Role.users()),
         ],
       );
       print(file);
@@ -147,260 +154,300 @@ class PlaygroundState extends State<Playground> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: const Text("Appwrite + Flutter = ❤️"),
-          backgroundColor: Colors.pinkAccent[200]),
-      body: Container(
-        child: SingleChildScrollView(
-          child: Column(
-            children: <Widget>[
-              const Padding(padding: EdgeInsets.all(20.0)),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  padding: const EdgeInsets.all(16),
-                  minimumSize: const Size(280, 50),
-                ),
-                onPressed: () async {
-                  try {
-                    await widget.account.createAnonymousSession();
-                    _getAccount();
-                  } on AppwriteException catch (e) {
-                    print(e.message);
-                  }
-                },
-                child: const Text(
-                  "Anonymous Login",
-                  style: TextStyle(color: Colors.black, fontSize: 20.0),
-                ),
+        title: const Text("Appwrite + Flutter = ❤️"),
+        backgroundColor: Colors.pinkAccent[200],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            const Padding(padding: EdgeInsets.all(20.0)),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
               ),
-              const SizedBox(height: 10.0),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () async {
-                    try {
-                      await widget.account.createEmailSession(
-                        email: 'user@appwrite.io',
-                        password: 'password',
-                      );
-                      _getAccount();
-                      print(user);
-                    } on AppwriteException catch (e) {
-                      print(e.message);
-                    }
-                  },
-                  child: const Text(
-                    "Login with Email",
-                    style: TextStyle(color: Colors.black, fontSize: 20.0),
-                  )),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size(280, 50),
-                  backgroundColor: Colors.blue,
-                  padding: const EdgeInsets.all(16),
-                ),
-                onPressed: subscription != null ? _unsubscribe : _subscribe,
-                child: Text(
-                  subscription != null ? "Unsubscribe" : "Subscribe",
-                  style: const TextStyle(color: Colors.white, fontSize: 20.0),
-                ),
+              onPressed: () async {
+                try {
+                  await widget.account.createAnonymousSession();
+                  _getAccount();
+                } on AppwriteException catch (e) {
+                  print(e.message);
+                }
+              },
+              child: const Text(
+                "Anonymous Login",
+                style: TextStyle(color: Colors.black, fontSize: 20.0),
               ),
-              if (realtimeEvent != null) ...[
-                const SizedBox(height: 10.0),
-                Text(realtimeEvent!),
-              ],
-              const SizedBox(height: 30.0),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    minimumSize: const Size(280, 50),
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(16),
-                  ),
-                  onPressed: () async {
-                    try {
-                      final document = await widget.database.createDocument(
-                        databaseId: ID.custom(databaseId),
-                        collectionId:
-                            ID.custom(collectionId), //change your collection id
-                        documentId: ID.unique(),
-                        data: {'username': 'hello2'},
-                        permissions: [
-                          Permission.read(Role.any()),
-                          Permission.write(Role.any()),
-                        ],
-                      );
-                      print(document.toMap());
-                    } on AppwriteException catch (e) {
-                      print(e.message);
-                    }
-                  },
-                  child: const Text(
-                    "Create Doc",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0),
-                  )),
-              const SizedBox(height: 10.0),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () {
-                    _uploadFile();
-                  },
-                  child: const Text(
-                    "Upload file",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0),
-                  )),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () async {
-                    try {
-                      jwt = await widget.account.createJWT();
-                      setState(() {});
-                    } on AppwriteException catch (e) {
-                      print(e.message);
-                    }
-                  },
-                  child: const Text("Generate JWT",
-                      style: TextStyle(color: Colors.white, fontSize: 20.0))),
-              const SizedBox(height: 20.0),
-              if (jwt != null) ...[
-                SelectableText(
-                  jwt!.jwt,
-                  style: const TextStyle(fontSize: 18.0),
-                ),
-                const SizedBox(height: 20.0),
-              ],
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () async {
-                    try {
-                      await widget.account.createOAuth2Session(
-                        provider: 'discord',
-                        success:
-                            kIsWeb ? '${location?.origin}/auth.html' : null,
-                      );
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () async {
+                try {
+                  await widget.account.createEmailPasswordSession(
+                    email: userEmail,
+                    password: userPassword,
+                  );
+                  _getAccount();
+                  print(user);
+                } on AppwriteException catch (e) {
+                  print(e.message);
+                }
+              },
+              child: const Text(
+                "Login with Email",
+                style: TextStyle(color: Colors.black, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () async {
+                try {
+                  await widget.account.createOAuth2Session(
+                    provider: OAuthProvider.discord,
+                    success: kIsWeb ? '${location?.origin}/auth.html' : null,
+                  );
+                  _getAccount();
+                } on AppwriteException catch (e) {
+                  print(e.message);
+                }
+              },
+              child: const Text(
+                "Login with Discord",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black87,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () {
+                widget.account
+                    .createOAuth2Session(
+                      provider: OAuthProvider.github,
+                      success: kIsWeb ? '${location?.origin}/auth.html' : null,
+                      failure: '',
+                    )
+                    .then((value) {
                       _getAccount();
-                    } on AppwriteException catch (e) {
-                      print(e.message);
-                    }
-                  },
-                  child: const Text(
-                    "Login with Discord",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0),
-                  )),
-              const Padding(padding: EdgeInsets.all(10.0)),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () {
-                    widget.account
-                        .createOAuth2Session(
-                            provider: 'github',
-                            success:
-                                kIsWeb ? '${location?.origin}/auth.html' : null,
-                            failure: '')
-                        .then((value) {
-                      _getAccount();
-                    }).catchError((error) {
+                    })
+                    .catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
-                  },
-                  child: const Text(
-                    "Login with GitHub",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0),
-                  )),
-              const Padding(padding: EdgeInsets.all(10.0)),
-              ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.all(16),
-                    minimumSize: const Size(280, 50),
-                  ),
-                  onPressed: () {
-                    widget.account
-                        .createOAuth2Session(
-                            provider: 'google',
-                            success:
-                                kIsWeb ? '${location?.origin}/auth.html' : null)
-                        .then((value) {
+              },
+              child: const Text(
+                "Login with GitHub",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () {
+                widget.account
+                    .createOAuth2Session(
+                      provider: OAuthProvider.google,
+                      success: kIsWeb ? '${location?.origin}/auth.html' : null,
+                    )
+                    .then((value) {
                       _getAccount();
-                    }).catchError((error) {
+                    })
+                    .catchError((error) {
                       print(error.message);
                     }, test: (e) => e is AppwriteException);
-                  },
-                  child: const Text(
-                    "Login with Google",
-                    style: TextStyle(color: Colors.white, fontSize: 20.0),
-                  )),
-              if (user != null && uploadedFile != null)
-                FutureBuilder<Uint8List>(
-                  future: widget.storage.getFilePreview(
+              },
+              child: const Text(
+                "Login with Google",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () {
+                widget.account
+                    .createOAuth2Session(
+                      provider: OAuthProvider.apple,
+                      success: kIsWeb ? '${location?.origin}/auth.html' : null,
+                    )
+                    .then((value) {
+                      _getAccount();
+                    })
+                    .catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+              },
+              child: const Text(
+                "Login with Apple",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+
+            const SizedBox(height: 20.0),
+            const Divider(),
+            const SizedBox(height: 20.0),
+            Text(
+              username,
+              style: const TextStyle(color: Colors.black, fontSize: 20.0),
+            ),
+            const SizedBox(height: 20.0),
+            const Divider(),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () async {
+                try {
+                  jwt = await widget.account.createJWT();
+                  setState(() {});
+                } on AppwriteException catch (e) {
+                  print(e.message);
+                }
+              },
+              child: const Text(
+                "Generate JWT",
+                style: TextStyle(color: Colors.black, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 10.0),
+            if (jwt != null) ...[
+              SelectableText(jwt!.jwt, style: const TextStyle(fontSize: 18.0)),
+              const SizedBox(height: 10.0),
+            ],
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red[700],
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () {
+                widget.account
+                    .deleteSession(sessionId: 'current')
+                    .then((response) {
+                      setState(() {
+                        username = 'No Session';
+                      });
+                    })
+                    .catchError((error) {
+                      print(error.message);
+                    }, test: (e) => e is AppwriteException);
+              },
+              child: const Text(
+                'Logout',
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(280, 50),
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.all(16),
+              ),
+              onPressed: subscription != null ? _unsubscribe : _subscribe,
+              child: Text(
+                subscription != null ? "Unsubscribe" : "Subscribe",
+                style: const TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            if (realtimeEvent != null) ...[
+              const SizedBox(height: 10.0),
+              Text(realtimeEvent!),
+            ],
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(280, 50),
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.all(16),
+              ),
+              onPressed: () async {
+                try {
+                  final document = await widget.database.createDocument(
+                    databaseId: ID.custom(databaseId),
+                    collectionId: ID.custom(collectionId),
+                    documentId: ID.unique(),
+                    data: {'username': 'hello2'},
+                    permissions: [
+                      Permission.read(Role.any()),
+                      Permission.write(Role.any()),
+                    ],
+                  );
+                  print(document.toMap());
+                } on AppwriteException catch (e) {
+                  print(e.message);
+                }
+              },
+              child: const Text(
+                "Create Doc",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            const SizedBox(height: 20.0),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                padding: const EdgeInsets.all(16),
+                minimumSize: const Size(280, 50),
+              ),
+              onPressed: () {
+                _uploadFile();
+              },
+              child: const Text(
+                "Upload file",
+                style: TextStyle(color: Colors.white, fontSize: 20.0),
+              ),
+            ),
+            if (user != null && uploadedFile != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 20.0),
+                child: SizedBox(
+                  width: 300.0,
+                  child: FutureBuilder<Uint8List>(
+                    future: widget.storage.getFileView(
                       bucketId: ID.custom(bucketId),
                       fileId: ID.custom(uploadedFile!.$id),
-                      width: 300),
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return Image.memory(snapshot.data!);
-                    }
-                    if (snapshot.hasError) {
-                      if (snapshot.error is AppwriteException) {
-                        print((snapshot.error as AppwriteException).message);
+                    ),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return Image.memory(snapshot.data!);
                       }
-                      print(snapshot.error);
-                    }
-                    return const CircularProgressIndicator();
-                  },
-                ),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              const Divider(),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              Text(username,
-                  style: const TextStyle(color: Colors.black, fontSize: 20.0)),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              const Divider(),
-              const Padding(padding: EdgeInsets.all(20.0)),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red[700],
-                  padding: const EdgeInsets.all(16),
-                  minimumSize: const Size(280, 50),
-                ),
-                onPressed: () {
-                  widget.account
-                      .deleteSession(sessionId: 'current')
-                      .then((response) {
-                    setState(() {
-                      username = 'No Session';
-                    });
-                  }).catchError((error) {
-                    print(error.message);
-                  }, test: (e) => e is AppwriteException);
-                },
-                child: const Text(
-                  'Logout',
-                  style: TextStyle(color: Colors.white, fontSize: 20.0),
+                      if (snapshot.hasError) {
+                        if (snapshot.error is AppwriteException) {
+                          print((snapshot.error as AppwriteException).message);
+                        }
+                        print(snapshot.error);
+                      }
+                      return const CircularProgressIndicator();
+                    },
+                  ),
                 ),
               ),
-              const Padding(padding: EdgeInsets.all(20.0)),
-            ],
-          ),
+            const SizedBox(height: 20.0),
+          ],
         ),
       ),
     );
@@ -410,23 +457,14 @@ class PlaygroundState extends State<Playground> {
 class MyDocument {
   final String userName;
   final String id;
-  MyDocument({
-    required this.userName,
-    required this.id,
-  });
+  MyDocument({required this.userName, required this.id});
 
   Map<String, dynamic> toMap() {
-    return {
-      'userName': userName,
-      'id': id,
-    };
+    return {'userName': userName, 'id': id};
   }
 
   factory MyDocument.fromMap(Map<String, dynamic> map) {
-    return MyDocument(
-      userName: map['username'],
-      id: map['\$id'],
-    );
+    return MyDocument(userName: map['username'], id: map['\$id']);
   }
 
   String toJson() => json.encode(toMap());
