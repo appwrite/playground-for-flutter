@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:appwrite/appwrite.dart';
 import 'package:appwrite/enums.dart';
@@ -6,7 +7,8 @@ import 'package:appwrite/models.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:window_location_href/window_location_href.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:window_location_href/window_location_href.dart' hide Platform;
 
 import 'constants.dart';
 
@@ -17,6 +19,7 @@ void main() {
   Account account = Account(client);
   Storage storage = Storage(client);
   Databases databases = Databases(client);
+  Functions functions = Functions(client);
 
   client
       .setEndpoint(
@@ -35,6 +38,7 @@ void main() {
         account: account,
         storage: storage,
         database: databases,
+        functions: functions,
       ),
     ),
   );
@@ -47,11 +51,13 @@ class Playground extends StatefulWidget {
     required this.account,
     required this.storage,
     required this.database,
+    required this.functions,
   }) : super(key: key);
   final Client client;
   final Account account;
   final Storage storage;
   final Databases database;
+  final Functions functions;
 
   @override
   PlaygroundState createState() => PlaygroundState();
@@ -303,8 +309,66 @@ class PlaygroundState extends State<Playground> {
                 style: TextStyle(color: Colors.white, fontSize: 20.0),
               ),
             ),
+            SizedBox(height: 10.0),
+            if (!kIsWeb && (Platform.isIOS || Platform.isMacOS))
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10.0),
+                child: SizedBox(
+                  width: 280.0,
+                  child: SignInWithAppleButton(
+                    onPressed: () async {
+                      final credential =
+                          await SignInWithApple.getAppleIDCredential(
+                            scopes: [
+                              AppleIDAuthorizationScopes.email,
+                              AppleIDAuthorizationScopes.fullName,
+                            ],
+                          );
 
-            const SizedBox(height: 20.0),
+                      print(credential);
+
+                      // Now send the credential (especially `credential.authorizationCode`) to the server to create a session
+                      // after they have been validated with Apple (see `Integration` section for more information on how to do this)
+
+                      print(credential.authorizationCode);
+
+                      final body = {'code': credential.authorizationCode};
+
+                      if (credential.givenName?.isNotEmpty ?? false) {
+                        body['firstName'] = credential.givenName!;
+                      }
+
+                      if (credential.familyName?.isNotEmpty ?? false) {
+                        body['lastName'] = credential.familyName!;
+                      }
+
+                      print(body);
+                      final t0 = DateTime.now();
+                      final execution = await widget.functions.createExecution(
+                        functionId: signInWithAppleFunctionId,
+                        method: ExecutionMethod.pOST,
+                        headers: {'Content-Type': 'application/json'},
+                        body: jsonEncode(body),
+                      );
+                      final t1 = DateTime.now();
+                      print('Execution took: ${t1.difference(t0)}');
+
+                      print(execution.status);
+
+                      print(execution.responseBody);
+
+                      final token = json.decode(execution.responseBody);
+
+                      await widget.account.createSession(
+                        userId: token['userId'],
+                        secret: token['secret'],
+                      );
+
+                      _getAccount();
+                    },
+                  ),
+                ),
+              ),
             const Divider(),
             const SizedBox(height: 20.0),
             Text(

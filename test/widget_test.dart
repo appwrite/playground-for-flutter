@@ -16,14 +16,19 @@ void main() {
     Account account = Account(client);
     Databases databases = Databases(client);
     Storage storage = Storage(client);
+    Functions functions = Functions(client);
     // Build our app and trigger a frame.
-    await tester.pumpWidget(MaterialApp(
+    await tester.pumpWidget(
+      MaterialApp(
         home: Playground(
-      client: client,
-      account: account,
-      database: databases,
-      storage: storage,
-    )));
+          client: client,
+          account: account,
+          database: databases,
+          storage: storage,
+          functions: functions,
+        ),
+      ),
+    );
 
     expect(find.text('Anonymous Login'), findsOneWidget);
   });

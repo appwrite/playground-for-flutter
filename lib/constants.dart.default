@@ -6,3 +6,4 @@ const userPassword = '';
 const databaseId = 'default';
 const bucketId = 'testBucket';
 const collectionId = 'usernames';
+const signInWithAppleFunctionId = 'sign-in-with-apple';
