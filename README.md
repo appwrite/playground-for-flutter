@@ -46,19 +46,19 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
    appwrite projects create-platform --project-id $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
 
-3. Use the Appwrite CLI to deploy the Database and Collection:
+4. Use the Appwrite CLI to deploy the Database and Collection:
 
    ```bash
    appwrite deploy collection --all --yes
    ```
 
-4. Use the Appwrite CLI to deploy the Bucket:
+5. Use the Appwrite CLI to deploy the Bucket:
 
    ```bash
    appwrite deploy bucket --all --yes
    ```
 
-5. Use the Appwrite CLI to create the test user:
+6. Use the Appwrite CLI to create the test user:
 
    Windows:
    ```bash
@@ -70,13 +70,13 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
    appwrite users create --user-id "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
    ```
 
-6. Create `lib/constants.dart` using `lib/constants.dart.default` as a template:
+7. Create `lib/constants.dart` using `lib/constants.dart.default` as a template:
 
    ```bash
    cp lib/constants.dart.default lib/constants.dart
    ```
 
-7. Run the app:
+8. Run the app:
 
    ```bash
    flutter run lib/main.dart
