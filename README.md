@@ -22,6 +22,17 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 
 2. Export your project ID as an environment variable (replace with your actual project ID):
 
+   For Windows Command Prompt (cmd):
+   ```cmd
+   set PROJECT_ID=playground-for-flutter
+   ```
+
+   For Windows PowerShell:
+   ```powershell
+   $env:PROJECT_ID="playground-for-flutter"
+   ```
+
+   For Unix / MacOS / Linux:
    ```bash
    export PROJECT_ID=playground-for-flutter
    ```
@@ -29,7 +40,7 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 3. Create a Flutter Platform for each platform you'd like to test:
 
    For Windows:
-   ```bash
+   ```cmd
    appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
    appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
    appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
@@ -37,7 +48,7 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
    appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
 
-   For Unix / MacOS:
+   For Unix / MacOS / Linux:
    ```bash
    appwrite projects create-platform --project-id $PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
    appwrite projects create-platform --project-id $PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
@@ -60,12 +71,12 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 
 6. Use the Appwrite CLI to create the test user:
 
-   Windows:
+   For Windows:
    ```bash
    appwrite users create --userId "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
    ```
 
-   Unix / MacOS:
+   For Unix / MacOS / Linux:
    ```bash
    appwrite users create --user-id "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
    ```
