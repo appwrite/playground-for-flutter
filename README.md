@@ -39,13 +39,22 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 
 3. Create a Flutter Platform for each platform you'd like to test:
 
-   For Windows:
+   For Windows Command Prompt (cmd):
    ```cmd
-   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
-   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
-   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
-   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
-   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
+   appwrite projects create-platform --project-id %PROJECT_ID% --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id %PROJECT_ID% --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
+   appwrite projects create-platform --project-id %PROJECT_ID% --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id %PROJECT_ID% --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
+   appwrite projects create-platform --project-id %PROJECT_ID% --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
+   ```
+
+   For Windows PowerShell:
+   ```powershell
+   appwrite projects create-platform --project-id $env:PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id $env:PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
+   appwrite projects create-platform --project-id $env:PROJECT_ID --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id $env:PROJECT_ID --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
+   appwrite projects create-platform --project-id $env:PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
 
    For Unix / MacOS / Linux:
@@ -71,12 +80,6 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 
 6. Use the Appwrite CLI to create the test user:
 
-   For Windows:
-   ```bash
-   appwrite users create --userId "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
-   ```
-
-   For Unix / MacOS / Linux:
    ```bash
    appwrite users create --user-id "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
    ```
