@@ -22,9 +22,9 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 2. Create a Flutter Platform for each platform you'd like to test:
 
    ```bash
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-ios --name "com.example.playgroundForFlutter" --key "com.example.playgroundForFlutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-android --name "com.example.playground_for_flutter" --key "com.example.playground_for_flutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-macos --name "com.example.playgroundForFlutter" --key "com.example.playgroundForFlutter"
+   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
+   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
    appwrite projects createPlatform --projectId playground-for-flutter --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
    appwrite projects createPlatform --projectId playground-for-flutter --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
