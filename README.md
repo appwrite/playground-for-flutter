@@ -19,14 +19,31 @@ This playground doesn't include any Appwrite best practices but rather intended 
 We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to setup your Appwrite project.
 
 1. Create a Project in the Appwrite Console with ID `playground-for-flutter`. If you're using a different Project ID, make sure to use the same ID in the following commands, the `appwrite.json`, and `android/app/src/main/AndroidManifest.xml`.
-2. Create a Flutter Platform for each platform you'd like to test:
+
+2. Export your project ID as an environment variable (replace with your actual project ID):
 
    ```bash
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
-   appwrite projects createPlatform --projectId playground-for-flutter --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
+   export PROJECT_ID=playground-for-flutter
+   ```
+
+3. Create a Flutter Platform for each platform you'd like to test:
+
+   For Windows:
+   ```bash
+   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
+   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
+   appwrite projects createPlatform --projectId $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
+   ```
+
+   For Unix / MacOS:
+   ```bash
+   appwrite projects create-platform --project-id $PROJECT_ID --type flutter-ios --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id $PROJECT_ID --type flutter-android --name "io.appwrite.playground_for_flutter" --key "io.appwrite.playground_for_flutter"
+   appwrite projects create-platform --project-id $PROJECT_ID --type flutter-macos --name "io.appwrite.playgroundForFlutter" --key "io.appwrite.playgroundForFlutter"
+   appwrite projects create-platform --project-id $PROJECT_ID --type flutter-windows --name "playground_for_flutter" --key "playground_for_flutter"
+   appwrite projects create-platform --project-id $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
 
 3. Use the Appwrite CLI to deploy the Database and Collection:
@@ -43,11 +60,27 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
 
 5. Use the Appwrite CLI to create the test user:
 
+   Windows:
    ```bash
-   appwrite users create --email "user@appwrite.io" --password "password" --name "Test User"
+   appwrite users create --userId "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
    ```
 
-6. Create `lib/constants.dart` using `lib/constants.dart.example` as a template.
+   Unix / MacOS:
+   ```bash
+   appwrite users create --user-id "unique()" --email "user@appwrite.io" --password "password" --name "Test User"
+   ```
+
+6. Create `lib/constants.dart` using `lib/constants.dart.default` as a template:
+
+   ```bash
+   cp lib/constants.dart.default lib/constants.dart
+   ```
+
+7. Run the app:
+
+   ```bash
+   flutter run lib/main.dart
+   ```
 
 ## Contributing
 
