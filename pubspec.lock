@@ -5,10 +5,10 @@ packages:
     dependency: "direct main"
     description:
       name: appwrite
-      sha256: a602b80b0a079b545128fa34a8a8a92d6cbe37e366373602f3c21909aa6737a5
+      sha256: "95759f0f6e2e091df0a06143f1a10cd6d45cd15d08b4acf852a38a9d3617413c"
       url: "https://pub.dev"
     source: hosted
-    version: "17.0.1"
+    version: "17.0.2"
   async:
     dependency: transitive
     description:
