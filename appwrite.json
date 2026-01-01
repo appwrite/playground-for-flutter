@@ -1,5 +1,6 @@
 {
-    "projectId": "playground-for-flutter",
+    "projectId": "678ae2c000224eb23337",
+    "endpoint": "https://fra.cloud.appwrite.io/v1",
     "projectName": "Playground for Flutter",
     "databases": [
         {

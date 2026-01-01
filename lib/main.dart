@@ -7,8 +7,10 @@ import 'package:appwrite/models.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:window_location_href/window_location_href.dart' hide Platform;
+import 'package:http/http.dart' as http;
 
 import 'constants.dart';
 
@@ -72,11 +74,64 @@ class PlaygroundState extends State<Playground> {
   RealtimeSubscription? subscription;
   final Uri? location = href == null ? null : Uri.parse(href!);
 
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    serverClientId:
+        '1080993215234-fi3fl2l83aupga6egl5j20s06vs94tjm.apps.googleusercontent.com',
+  );
+
   @override
   void initState() {
     _getAccount();
     widget.client.ping();
     super.initState();
+  }
+
+  Future<void> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? account = await _googleSignIn.signIn();
+
+      print(account);
+
+      if (account == null) return;
+      
+      final GoogleSignInAuthentication auth = await account.authentication;
+      final String? idToken = auth.idToken;
+      
+      if (idToken != null) {
+        await showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Google ID Token'),
+            content: SingleChildScrollView(
+              child: SelectableText(idToken),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text('Close'),
+              )
+            ],
+          ),
+        );
+
+        // Send the idToken to your Appwrite function
+        final response = await http.post(
+          Uri.parse('https://69384c90001657530e01.fra.appwrite.run/'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'idToken': idToken}),
+        );
+        // Handle the response
+        if(response.statusCode == 200) {
+          _getAccount();
+        } else {
+          print('Error signing in with Google: ${response.body}');
+        }
+      }
+    } catch (error) {
+      print('Error signing in with Google: $error');
+    }
   }
 
   _getAccount() async {
@@ -266,19 +321,7 @@ class PlaygroundState extends State<Playground> {
                 padding: const EdgeInsets.all(16),
                 minimumSize: const Size(280, 50),
               ),
-              onPressed: () {
-                widget.account
-                    .createOAuth2Session(
-                      provider: OAuthProvider.google,
-                      success: kIsWeb ? '${location?.origin}/auth.html' : null,
-                    )
-                    .then((value) {
-                      _getAccount();
-                    })
-                    .catchError((error) {
-                      print(error.message);
-                    }, test: (e) => e is AppwriteException);
-              },
+              onPressed: signInWithGoogle,
               child: const Text(
                 "Login with Google",
                 style: TextStyle(color: Colors.white, fontSize: 20.0),
