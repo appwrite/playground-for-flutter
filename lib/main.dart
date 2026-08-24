@@ -18,7 +18,7 @@ void main() {
   Client client = Client();
   Account account = Account(client);
   Storage storage = Storage(client);
-  Databases databases = Databases(client);
+  TablesDB tablesDB = TablesDB(client);
   Functions functions = Functions(client);
 
   client
@@ -37,7 +37,7 @@ void main() {
         client: client,
         account: account,
         storage: storage,
-        database: databases,
+        tablesDB: tablesDB,
         functions: functions,
       ),
     ),
@@ -50,13 +50,13 @@ class Playground extends StatefulWidget {
     required this.client,
     required this.account,
     required this.storage,
-    required this.database,
+    required this.tablesDB,
     required this.functions,
   }) : super(key: key);
   final Client client;
   final Account account;
   final Storage storage;
-  final Databases database;
+  final TablesDB tablesDB;
   final Functions functions;
 
   @override
@@ -99,7 +99,7 @@ class PlaygroundState extends State<Playground> {
 
   _uploadFile() async {
     try {
-      final response = await FilePicker.platform.pickFiles(
+      final response = await FilePicker.pickFiles(
         type: FileType.image,
         allowMultiple: false,
       );
@@ -139,7 +139,7 @@ class PlaygroundState extends State<Playground> {
 
   _subscribe() {
     final realtime = Realtime(widget.client);
-    subscription = realtime.subscribe(['files', 'documents']);
+    subscription = realtime.subscribe([Channel.files(), Channel.rows()]);
     setState(() {});
     subscription!.stream.listen((data) {
       print(data);
@@ -150,7 +150,7 @@ class PlaygroundState extends State<Playground> {
   }
 
   _unsubscribe() {
-    subscription?.close();
+    subscription?.unsubscribe();
     setState(() {
       subscription = null;
     });
@@ -450,23 +450,23 @@ class PlaygroundState extends State<Playground> {
               ),
               onPressed: () async {
                 try {
-                  final document = await widget.database.createDocument(
+                  final row = await widget.tablesDB.createRow(
                     databaseId: ID.custom(databaseId),
-                    collectionId: ID.custom(collectionId),
-                    documentId: ID.unique(),
+                    tableId: ID.custom(tableId),
+                    rowId: ID.unique(),
                     data: {'username': 'hello2'},
                     permissions: [
                       Permission.read(Role.any()),
                       Permission.write(Role.any()),
                     ],
                   );
-                  print(document.toMap());
+                  print(row.toMap());
                 } on AppwriteException catch (e) {
                   print(e.message);
                 }
               },
               child: const Text(
-                "Create Doc",
+                "Create Row",
                 style: TextStyle(color: Colors.white, fontSize: 20.0),
               ),
             ),

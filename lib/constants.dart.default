@@ -5,5 +5,5 @@ const userEmail = 'user@appwrite.io';
 const userPassword = 'password';
 const databaseId = 'default';
 const bucketId = 'testBucket';
-const collectionId = 'usernames';
+const tableId = 'usernames';
 const signInWithAppleFunctionId = 'sign-in-with-apple';

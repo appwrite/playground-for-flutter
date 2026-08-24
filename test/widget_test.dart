@@ -14,7 +14,7 @@ void main() {
   testWidgets('Playground loads', (WidgetTester tester) async {
     Client client = Client();
     Account account = Account(client);
-    Databases databases = Databases(client);
+    TablesDB tablesDB = TablesDB(client);
     Storage storage = Storage(client);
     Functions functions = Functions(client);
     // Build our app and trigger a frame.
@@ -23,7 +23,7 @@ void main() {
         home: Playground(
           client: client,
           account: account,
-          database: databases,
+          tablesDB: tablesDB,
           storage: storage,
           functions: functions,
         ),

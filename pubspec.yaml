@@ -21,10 +21,10 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  appwrite: ^17.0.1
-  file_picker: ^10.2.0
+  appwrite: ^25.4.0
+  file_picker: ^11.0.3
   window_location_href: ^1.0.1+2
-  sign_in_with_apple: ^7.0.1
+  sign_in_with_apple: ^8.1.0
 
 dev_dependencies:
   flutter_test:
