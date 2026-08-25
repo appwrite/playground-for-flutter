@@ -18,7 +18,7 @@ This playground doesn't include any Appwrite best practices but rather intended 
 
 We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to setup your Appwrite project.
 
-1. Create a Project in the Appwrite Console with ID `playground-for-flutter`. If you're using a different Project ID, make sure to use the same ID in the following commands, the `appwrite.json`, and `android/app/src/main/AndroidManifest.xml`.
+1. Create a Project in the Appwrite Console with ID `playground-for-flutter`. If you're using a different Project ID, make sure to use the same ID in the following commands, the `appwrite.config.json`, and `android/app/src/main/AndroidManifest.xml`.
 
 2. Export your project ID as an environment variable (replace with your actual project ID):
 
@@ -66,16 +66,17 @@ We recommend using the [Appwrite CLI](https://appwrite.io/docs/command-line) to 
    appwrite projects create-platform --project-id $PROJECT_ID --type flutter-linux --name "playground_for_flutter" --key "playground_for_flutter"
    ```
 
-4. Use the Appwrite CLI to deploy the Database and Collection:
+4. Use the Appwrite CLI to create the Database and push the Table:
 
    ```bash
-   appwrite deploy collection --all --yes
+   appwrite tables-db create --database-id "default" --name "Default"
+   appwrite push table --all --force
    ```
 
-5. Use the Appwrite CLI to deploy the Bucket:
+5. Use the Appwrite CLI to push the Bucket:
 
    ```bash
-   appwrite deploy bucket --all --yes
+   appwrite push bucket --all --force
    ```
 
 6. Use the Appwrite CLI to create the test user:
