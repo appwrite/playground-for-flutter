@@ -99,17 +99,13 @@ class PlaygroundState extends State<Playground> {
 
   _uploadFile() async {
     try {
-      final response = await FilePicker.pickFiles(
-        type: FileType.image,
-        allowMultiple: false,
-      );
-      if (response == null) return;
-      final pickedFile = response.files.single;
+      final pickedFile = await FilePicker.pickFile(type: FileType.image);
+      if (pickedFile == null) return;
       late InputFile inFile;
       if (kIsWeb) {
         inFile = InputFile.fromBytes(
           filename: pickedFile.name,
-          bytes: pickedFile.bytes!,
+          bytes: await pickedFile.readAsBytes(),
         );
       } else {
         inFile = InputFile.fromPath(

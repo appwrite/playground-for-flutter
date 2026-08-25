@@ -7,7 +7,7 @@ import Foundation
 
 import desktop_webview_window
 import device_info_plus
-import file_picker
+import file_picker_darwin
 import flutter_web_auth_2
 import package_info_plus
 import path_provider_foundation
