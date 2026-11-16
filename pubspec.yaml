@@ -21,7 +21,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  appwrite: ^26.0.0
+  appwrite: ^28.0.0
   file_picker: ^12.0.0
   window_location_href: ^2.0.0
   sign_in_with_apple: ^8.1.0
